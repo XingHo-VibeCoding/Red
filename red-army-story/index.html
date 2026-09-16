@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>长征 · 红军叙事</title>
+<style>
+  :root {
+    --crimson: #7a1418;
+    --crimson-deep: #4a0d10;
+    --gold: #d4af37;
+    --gold-soft: #c9a96a;
+    --ink: #1a0e0e;
+    --ink-2: #2b1414;
+    --parchment: #f4ecd8;
+    --parchment-ink: #3a2418;
+    --serif: "Noto Serif SC", "Songti SC", "STSong", "SimSun", "Source Han Serif SC", serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--serif);
+    background: var(--ink);
+    color: #f0e6d2;
+    line-height: 1.9;
+    overflow-x: hidden;
+  }
+
+  /* 滚动进度条 */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+    z-index: 999;
+    transition: width 0.1s linear;
+  }
+
+  /* ---------- 开场 ---------- */
+  .hero {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background:
+      radial-gradient(circle at 50% 35%, rgba(122,20,24,0.55), transparent 60%),
+      linear-gradient(180deg, var(--ink) 0%, var(--crimson-deep) 100%);
+    position: relative;
+  }
+  .hero .seal {
+    width: 92px; height: 92px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold);
+    font-size: 30px;
+    letter-spacing: 2px;
+    margin-bottom: 28px;
+    box-shadow: 0 0 40px rgba(212,175,55,0.25);
+  }
+  .hero h1 {
+    font-size: clamp(56px, 13vw, 150px);
+    color: var(--gold);
+    letter-spacing: 14px;
+    text-indent: 14px;
+    font-weight: 700;
+    text-shadow: 0 4px 30px rgba(0,0,0,0.6);
+  }
+  .hero .sub {
+    margin-top: 18px;
+    font-size: clamp(15px, 2.4vw, 20px);
+    color: var(--gold-soft);
+    letter-spacing: 6px;
+  }
+  .hero .scroll-hint {
+    position: absolute;
+    bottom: 42px;
+    color: var(--gold-soft);
+    font-size: 13px;
+    letter-spacing: 4px;
+    animation: float 2.4s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); opacity: 0.5; }
+    50% { transform: translateY(10px); opacity: 1; }
+  }
+
+  /* ---------- 叙事段 ---------- */
+  .chapter {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 14vh 8vw;
+    position: relative;
+    background: linear-gradient(180deg, var(--crimson-deep), var(--ink-2));
+    border-top: 1px solid rgba(212,175,55,0.12);
+  }
+  .chapter .year {
+    font-size: clamp(40px, 9vw, 110px);
+    color: rgba(212,175,55,0.22);
+    font-weight: 700;
+    letter-spacing: 4px;
+    line-height: 1;
+  }
+  .chapter .tag {
+    color: var(--gold);
+    letter-spacing: 8px;
+    font-size: 15px;
+    margin: 18px 0 14px;
+  }
+  .chapter h2 {
+    font-size: clamp(28px, 5vw, 48px);
+    color: #f4ead0;
+    letter-spacing: 3px;
+    margin-bottom: 22px;
+  }
+  .chapter p {
+    max-width: 760px;
+    font-size: clamp(16px, 2.2vw, 19px);
+    color: #d9cbb0;
+  }
+  .chapter .pull {
+    margin-top: 30px;
+    padding-left: 20px;
+    border-left: 3px solid var(--gold);
+    color: var(--gold-soft);
+    font-style: italic;
+    font-size: clamp(15px, 2vw, 18px);
+    max-width: 640px;
+  }
+
+  /* 进入视口动效 */
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 1s ease, transform 1s ease; }
+  .reveal.show { opacity: 1; transform: none; }
+
+  /* ---------- 转场：醒来 ---------- */
+  .awaken {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 12vh 8vw;
+    background: linear-gradient(180deg, var(--ink-2) 0%, #6b2024 45%, #b9742e 70%, var(--parchment) 100%);
+  }
+  .awaken .line1 {
+    font-size: clamp(20px, 3.4vw, 34px);
+    color: #f4ead0;
+    letter-spacing: 3px;
+    max-width: 720px;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.4);
+  }
+  .awaken .divider {
+    width: 60px; height: 2px;
+    background: var(--gold);
+    margin: 34px 0;
+  }
+  .awaken .line2 {
+    font-size: clamp(22px, 4vw, 40px);
+    color: var(--parchment-ink);
+    letter-spacing: 4px;
+    font-weight: 700;
+  }
+
+  /* ---------- 浏览态（正常态）---------- */
+  .browse {
+    background: var(--parchment);
+    color: var(--parchment-ink);
+    padding: 11vh 7vw 14vh;
+  }
+  .section-head {
+    text-align: center;
+    margin-bottom: 54px;
+  }
+  .section-head .kicker {
+    color: var(--crimson);
+    letter-spacing: 8px;
+    font-size: 14px;
+  }
+  .section-head h3 {
+    font-size: clamp(30px, 5vw, 46px);
+    letter-spacing: 4px;
+    margin-top: 10px;
+    color: var(--crimson-deep);
+  }
+  .section-head .rule {
+    width: 70px; height: 3px;
+    background: var(--crimson);
+    margin: 18px auto 0;
+  }
+
+  /* 英雄故事卡片 */
+  .heroes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 22px;
+    max-width: 1100px;
+    margin: 0 auto 90px;
+  }
+  .card {
+    background: #fffaf0;
+    border: 1px solid rgba(122,20,24,0.18);
+    border-radius: 6px;
+    padding: 26px 24px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: "";
+    position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--crimson);
+  }
+  .card:hover { transform: translateY(-6px); box-shadow: 0 14px 34px rgba(74,13,16,0.16); }
+  .card .name {
+    font-size: 24px;
+    color: var(--crimson-deep);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .card .role {
+    font-size: 13px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+  .card .brief { font-size: 15px; color: #5a4636; }
+  .card .more {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--crimson);
+    letter-spacing: 2px;
+  }
+  .card .detail {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease, margin-top 0.45s ease;
+    font-size: 14px;
+    color: #5a4636;
+  }
+  .card.open .detail { max-height: 400px; margin-top: 14px; }
+
+  /* 名人名言 */
+  .quotes {
+    max-width: 880px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .quote {
+    padding: 30px 8px;
+    border-bottom: 1px dashed rgba(122,20,24,0.25);
+    text-align: center;
+  }
+  .quote:last-child { border-bottom: none; }
+  .quote .text {
+    font-size: clamp(20px, 3.2vw, 30px);
+    color: var(--crimson-deep);
+    letter-spacing: 2px;
+    line-height: 1.7;
+  }
+  .quote .from {
+    margin-top: 14px;
+    font-size: 14px;
+    color: var(--gold);
+    letter-spacing: 3px;
+  }
+
+  footer {
+    background: var(--ink);
+    color: var(--gold-soft);
+    text-align: center;
+    padding: 40px 8vw;
+    font-size: 13px;
+    letter-spacing: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+  <div id="progress"></div>
+
+  <!-- 开场 -->
+  <header class="hero">
+    <div class="seal">红</div>
+    <h1>红军</h1>
+    <div class="sub">长 征 · 二 万 五 千 里</div>
+    <div class="scroll-hint">向下滚动，听一段故事 ↓</div>
+  </header>
+
+  <!-- 叙事段 -->
+  <section class="chapter">
+    <div class="year reveal">1934</div>
+    <div class="tag reveal">序章 · 出发</div>
+    <h2 class="reveal">从瑞金启程</h2>
+    <p class="reveal">中央苏区第五次反"围剿"失利，八万余红军主力被迫离开家园，于秋日里踏上战略转移之路。他们不知道终点在哪，只知道脚下必须向前。</p>
+    <div class="pull reveal">"十月里来秋风凉，中央红军远征忙。"</div>
+  </section>
+
+  <section class="chapter">
+    <div class="year reveal">1934</div>
+    <div class="tag reveal">血战 · 湘江</div>
+    <h2 class="reveal">湘江之痛</h2>
+    <p class="reveal">突破第四道封锁线，红军在湘江畔与数倍之敌血战。出发时的八万余人，渡江后仅余三万余。惨烈的代价，把一个生死攸关的转折推到了眼前。</p>
+    <div class="pull reveal">"三年不饮湘江水，十年不食湘江鱼。"</div>
+  </section>
+
+  <section class="chapter">
+    <div class="year reveal">1935</div>
+    <div class="tag reveal">转折 · 遵义</div>
+    <h2 class="reveal">遵义会议</h2>
+    <p class="reveal">在最危急的关头，一次会议改变了队伍的航向。正确的军事指挥重新确立，这支队伍终于找回了自己的方向。</p>
+    <div class="pull reveal">"生死攸关的转折点。"</div>
+  </section>
+
+  <section class="chapter">
+    <div class="year reveal">1935</div>
+    <div class="tag reveal">绝境 · 雪山草地</div>
+    <h2 class="reveal">翻雪山，过草地</h2>
+    <p class="reveal">夹金山的雪、松潘草地的泥，是没有硝烟的战场。缺衣少食，前有险路，后有追兵，支撑他们走下去的，是不肯低下的头。</p>
+    <div class="pull reveal">"风雨浸衣骨更硬，野菜充饥志越坚。"</div>
+  </section>
+
+  <section class="chapter">
+    <div class="year reveal">1936</div>
+    <div class="tag reveal">会师 · 会宁</div>
+    <h2 class="reveal">三军会宁会师</h2>
+    <p class="reveal">红一、二、四方面军在甘肃会宁胜利会师，历时两年的长征落下帷幕。二万五千里，他们用脚底板走完了一部意志的史诗。</p>
+    <div class="pull reveal">"红军不怕远征难，万水千山只等闲。"</div>
+  </section>
+
+  <!-- 转场：醒来 -->
+  <section class="awaken">
+    <div class="line1 reveal">二万五千里，他们走完了。</div>
+    <div class="divider"></div>
+    <div class="line2 reveal">而我们，正走在他们换来的今天里。</div>
+  </section>
+
+  <!-- 浏览态：正常状态 -->
+  <main class="browse">
+    <div class="section-head">
+      <div class="kicker">英 雄 故 事</div>
+      <h3>记住这些名字</h3>
+      <div class="rule"></div>
+    </div>
+
+    <div class="heroes" id="heroes"></div>
+
+    <div class="section-head" style="margin-top:40px;">
+      <div class="kicker">名 人 名 言</div>
+      <h3>他们说过</h3>
+      <div class="rule"></div>
+    </div>
+
+    <div class="quotes" id="quotes"></div>
+  </main>
+
+  <footer>
+    谨以此页，纪念中国工农红军长征胜利 · 历史不容忘却
+  </footer>
+
+<script>
+  // 英雄故事数据
+  const heroes = [
+    { name: "朱德", role: "红军总司令", brief: "与士兵同甘共苦，被赞'度量如大海，意志如钢铁'。",
+      detail: "朱德参与领导南昌起义，后率部上井冈山与毛泽东会师。长征中任红军总司令，始终与官兵同吃同住、共度艰险，以沉稳宽厚的品格凝聚军心。" },
+    { name: "方志敏", role: "闽浙赣根据地创建者", brief: "《可爱的中国》作者，坚贞不屈。",
+      detail: "方志敏是赣东北革命根据地和红十军的创建人之一。1935 年被俘后，在狱中写下《可爱的中国》《清贫》等不朽篇章，同年英勇就义，留下'敌人只能砍下我们的头颅，决不能动摇我们的信仰'的誓言。" },
+    { name: "彭德怀", role: "红三军团军团长", brief: "长征中以骁勇善战著称。",
+      detail: "彭德怀指挥红三军团担任前锋与殿后，强渡乌江、攻克娄山关、力克腊子口等硬仗中屡建奇功，是长征路上最锋利的一把刀。" },
+    { name: "徐海东", role: "红二十五军军长", brief: "人称'徐老虎'，为北上打开通道。",
+      detail: "徐海东率领的红二十五军率先到达陕北，并牵制敌军、接应中央红军北上，被毛泽东称为'对中国革命有大功的人'。" },
+    { name: "陈树湘", role: "红三十四师师长", brief: "湘江血战后断肠明志。",
+      detail: "湘江战役中，红三十四师担负全军后卫，师长陈树湘重伤被俘后毅然绞肠自尽，以二十九岁的生命诠释了'为苏维埃流尽最后一滴血'。" },
+    { name: "贺龙", role: "红二方面军总指挥", brief: "两把菜刀起家闹革命。",
+      detail: "贺龙是红二、六军团（后红二方面军）的主要创建者和领导者，长征中率部转战湘鄂川黔，有力策应了中央红军的战略转移。" }
+  ];
+
+  // 名人名言数据
+  const quotes = [
+    { text: "红军不怕远征难，万水千山只等闲。", from: "—— 毛泽东《七律·长征》" },
+    { text: "星星之火，可以燎原。", from: "—— 毛泽东" },
+    { text: "敌人只能砍下我们的头颅，决不能动摇我们的信仰！", from: "—— 方志敏" },
+    { text: "我们中华民族有同自己的敌人血战到底的气概，有在自力更生的基础上光复旧物的决心，有自立于世界民族之林的能力。", from: "—— 毛泽东" },
+    { text: "下定决心，不怕牺牲，排除万难，去争取胜利。", from: "—— 毛泽东" },
+    { text: "苦不苦，想想红军二万五；累不累，想想革命老前辈。", from: "—— 民间流传" }
+  ];
+
+  // 渲染英雄卡片
+  const heroesEl = document.getElementById("heroes");
+  heroes.forEach(h => {
+    const card = document.createElement("div");
+    card.className = "card reveal";
+    card.innerHTML = `
+      <div class="name">${h.name}</div>
+      <div class="role">${h.role}</div>
+      <div class="brief">${h.brief}</div>
+      <div class="more">点击展开 ↕</div>
+      <div class="detail">${h.detail}</div>`;
+    card.addEventListener("click", () => {
+      card.classList.toggle("open");
+      card.querySelector(".more").textContent = card.classList.contains("open") ? "收起 ↕" : "点击展开 ↕";
+    });
+    heroesEl.appendChild(card);
+  });
+
+  // 渲染名言
+  const quotesEl = document.getElementById("quotes");
+  quotes.forEach(q => {
+    const div = document.createElement("div");
+    div.className = "quote reveal";
+    div.innerHTML = `<div class="text">${q.text}</div><div class="from">${q.from}</div>`;
+    quotesEl.appendChild(div);
+  });
+
+  // 滚动进度条
+  const progress = document.getElementById("progress");
+  window.addEventListener("scroll", () => {
+    const h = document.documentElement;
+    const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = scrolled + "%";
+  }, { passive: true });
+
+  // 进入视口动效
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("show"); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+</script>
+</body>
+</html>
