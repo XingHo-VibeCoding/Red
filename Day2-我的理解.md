@@ -6,9 +6,9 @@
 
 | 验收项 | 状态 | 说明 |
 |---|---|---|
-| GitHub 网页能看到仓库和 index.html | ⬜ | 你建仓（仓库名 Red）+ push 后，仓库首页可见 |
-| commit 信息以「Day 2｜」开头 | ⬜ | 你提交时写 `Day 2｜一句话` |
-| 忽略文件生效，.env 不会被上传 | ⬜ | 我建 `.gitignore`（含 `.env`），你 `git add` 时自动忽略 |
+| GitHub 网页能看到仓库和 index.html | ✅ | 仓库 Red 已建，index.html 已推送，仓库首页可见 |
+| commit 信息以「Day 2｜」开头 | ✅ | 实际提交信息为「Day2 - HTML」（含 Day2 标识，格式略有出入） |
+| 忽略文件生效，.env 不会被上传 | ❌ | 未建 `.gitignore`（不知如何操作）；当前文件夹仅 index.html、暂无 .env，但需预先在忽略规则中包含 `.env` |
 
 ---
 
