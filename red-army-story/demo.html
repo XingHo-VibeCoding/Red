@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>长征 · 二万五千里｜叙事 Demo（按 PRD v1）</title>
+<style>
+  :root{
+    --crimson:#7a1418;
+    --crimson-deep:#4a0d10;
+    --gold:#d4af37;
+    --gold-soft:#c9a96a;
+    --ink:#120a0a;
+    --ink-2:#1d1010;
+    --paper:#f4ecd8;
+    --paper-ink:#3a2418;
+    --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun",serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:var(--serif);
+    background:var(--ink);
+    color:#efe4cf;
+    line-height:1.95;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  body.locked{overflow:hidden;height:100vh;}
+
+  /* ================= 一次性进入引导页（A1 / A11） ================= */
+  #cover{
+    position:fixed;inset:0;z-index:1000;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:8vh 6vw;
+    background:
+      radial-gradient(circle at 50% 38%, rgba(122,20,24,.60), transparent 62%),
+      linear-gradient(180deg, #0d0707 0%, #2a0d0f 55%, #4a0d10 100%);
+    transition:opacity 1s ease, visibility 1s ease;
+  }
+  #cover.hide{opacity:0;visibility:hidden;}
+  .cover-seal{
+    width:88px;height:88px;border:2px solid var(--gold);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--gold);font-size:34px;letter-spacing:2px;margin-bottom:30px;
+    box-shadow:0 0 46px rgba(212,175,55,.28);
+  }
+  #cover h1{
+    font-size:clamp(56px,13vw,150px);color:var(--gold);
+    letter-spacing:16px;text-indent:16px;font-weight:700;line-height:1.1;
+    text-shadow:0 4px 34px rgba(0,0,0,.65);
+  }
+  #cover .cover-sub{margin-top:16px;font-size:clamp(14px,2.2vw,19px);color:var(--gold-soft);letter-spacing:8px;}
+  #cover .hp-hint{
+    margin-top:44px;display:inline-flex;align-items:center;gap:12px;
+    padding:12px 24px;border:1px solid rgba(212,175,55,.45);border-radius:40px;
+    color:var(--gold-soft);font-size:clamp(13px,1.8vw,16px);letter-spacing:2px;
+  }
+  #cover .hp-hint .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);}
+  .start-btn{
+    margin-top:30px;padding:16px 60px;border:1px solid var(--gold);border-radius:4px;
+    background:transparent;color:var(--gold);font-family:var(--serif);
+    font-size:clamp(16px,2.2vw,20px);letter-spacing:8px;cursor:pointer;
+    transition:background .4s ease,color .4s ease,box-shadow .4s ease;
+  }
+  .start-btn:hover{background:var(--gold);color:#2a0d0f;box-shadow:0 0 40px rgba(212,175,55,.4);}
+  #cover .cover-note{margin-top:22px;font-size:12.5px;color:rgba(201,169,106,.7);letter-spacing:2px;}
+
+  /* ================= 静音按钮（A11） ================= */
+  #audio-toggle{
+    position:fixed;top:22px;right:24px;z-index:900;
+    padding:9px 18px;border:1px solid rgba(212,175,55,.5);border-radius:30px;
+    background:rgba(18,10,10,.55);backdrop-filter:blur(6px);
+    color:var(--gold-soft);font-family:var(--serif);font-size:13px;letter-spacing:2px;
+    cursor:pointer;opacity:0;visibility:hidden;transition:opacity .8s ease,color .3s ease,border-color .3s ease;
+  }
+  #audio-toggle.stay{opacity:1;visibility:visible;}
+  #audio-toggle:hover{color:var(--gold);border-color:var(--gold);}
+  #audio-toggle.muted{color:rgba(201,169,106,.45);border-color:rgba(212,175,55,.25);}
+
+  /* ================= 地图式进度（A4） ================= */
+  #map{
+    position:fixed;left:26px;bottom:26px;z-index:850;
+    width:300px;padding:14px 14px 10px;
+    background:linear-gradient(180deg, rgba(18,10,10,.72), rgba(18,10,10,.5));
+    border:1px solid rgba(212,175,55,.22);border-radius:10px;
+    backdrop-filter:blur(7px);
+    opacity:0;transform:translateY(14px);
+    transition:opacity 1s ease .3s, transform 1s ease .3s;
+    pointer-events:none;
+  }
+  #map.stay{opacity:1;transform:none;}
+  #map .map-title{
+    font-size:11px;letter-spacing:4px;color:rgba(201,169,106,.85);
+    display:flex;justify-content:space-between;align-items:baseline;
+  }
+  #map .map-current{font-size:12px;letter-spacing:2px;color:var(--gold);}
+  #map svg{display:block;width:100%;height:auto;margin-top:8px;}
+  #route{
+    fill:none;stroke:url(#routeGrad);stroke-width:2.4;
+    stroke-linecap:round;stroke-linejoin:round;
+    filter:drop-shadow(0 0 5px rgba(212,175,55,.55));
+  }
+  #routeBase{
+    fill:none;stroke:rgba(212,175,55,.16);stroke-width:2.4;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  .node circle{
+    fill:#1d1010;stroke:rgba(212,175,55,.5);stroke-width:1.6;
+    transition:fill .6s ease,stroke .6s ease,r .4s ease;
+  }
+  .node text{
+    font-family:var(--serif);font-size:11px;letter-spacing:1px;
+    fill:rgba(212,175,55,.42);text-anchor:middle;
+    transition:fill .6s ease;
+  }
+  .node.active circle{fill:var(--gold);stroke:var(--gold);r:6;filter:drop-shadow(0 0 7px rgba(212,175,55,.9));}
+  .node.active text{fill:var(--gold);}
+  .node.pulse circle{animation:nodePulse 1.6s ease-out;}
+  @keyframes nodePulse{
+    0%{r:6;opacity:1;}
+    100%{r:16;opacity:.15;}
+  }
+
+  /* ================= 叙事场景 ================= */
+  .scene{
+    min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+    padding:16vh 9vw;position:relative;
+    background:linear-gradient(180deg, var(--ink) 0%, var(--crimson-deep) 45%, var(--ink-2) 100%);
+    border-top:1px solid rgba(212,175,55,.09);
+  }
+  .scene::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(circle at 50% 40%, transparent 45%, rgba(0,0,0,.5) 100%);
+  }
+  .scene > *{position:relative;z-index:1;}
+  .kicker{color:var(--gold);letter-spacing:9px;font-size:clamp(12px,1.6vw,15px);margin-bottom:26px;}
+  .headline{
+    font-size:clamp(38px,7vw,86px);color:#f7eed6;font-weight:700;
+    letter-spacing:6px;line-height:1.22;margin-bottom:34px;
+    text-shadow:0 6px 30px rgba(0,0,0,.55);
+  }
+  .body{max-width:820px;font-size:clamp(16px,2vw,20px);color:#d9cbb0;}
+  .body p{margin-bottom:20px;}
+  .quote{
+    margin-top:34px;padding-left:22px;border-left:3px solid var(--gold);
+    max-width:760px;font-size:clamp(17px,2.2vw,23px);color:var(--gold-soft);
+    letter-spacing:2px;line-height:1.8;
+  }
+
+  /* 大字号出场动效 */
+  .reveal{opacity:0;transform:translateY(46px);filter:blur(6px);
+    transition:opacity 1.2s cubic-bezier(.22,.61,.36,1),transform 1.2s cubic-bezier(.22,.61,.36,1),filter 1.2s ease;}
+  .reveal.show{opacity:1;transform:none;filter:blur(0);}
+  .d1{transition-delay:.12s;} .d2{transition-delay:.24s;} .d3{transition-delay:.36s;} .d4{transition-delay:.48s;}
+
+  /* ================= 收尾升华（A5） ================= */
+  #finale{
+    min-height:110vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:14vh 8vw;
+    background:linear-gradient(180deg, var(--ink-2) 0%, #6a1f24 42%, #b5722d 68%, var(--paper) 100%);
+  }
+  #finale .line1{font-size:clamp(22px,3.6vw,40px);color:#f6ecd6;letter-spacing:5px;line-height:1.6;text-shadow:0 3px 20px rgba(0,0,0,.45);}
+  #finale .divider{width:64px;height:2px;background:var(--gold);margin:40px 0;}
+  #finale .line2{font-size:clamp(24px,4.4vw,52px);color:#2e1a10;letter-spacing:6px;font-weight:700;}
+  #finale .line3{margin-top:64px;font-size:clamp(14px,2vw,18px);color:rgba(58,36,24,.8);letter-spacing:4px;}
+
+  footer{
+    background:var(--ink);color:rgba(201,169,106,.55);text-align:center;
+    padding:44px 8vw 52px;font-size:12px;letter-spacing:3px;line-height:2;
+  }
+
+  @media (max-width:760px){
+    #map{left:14px;bottom:14px;width:210px;padding:10px 10px 6px;}
+    #map .map-title{font-size:9.5px;letter-spacing:2px;}
+    #map .map-current{font-size:10.5px;}
+    .node text{font-size:13px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;filter:none;transition:none;}
+    .node.pulse circle{animation:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body class="locked">
+
+  <!-- ========== 一次性进入引导页 ========== -->
+  <div id="cover">
+    <div class="cover-seal">红</div>
+    <h1>长征</h1>
+    <div class="cover-sub">红 军 · 二 万 五 千 里</div>
+    <div class="hp-hint"><span class="dot"></span>建议佩戴耳机，沉浸式体验这段路</div>
+    <button class="start-btn" id="startBtn">开 始 体 验</button>
+    <div class="cover-note">点击后将开启背景音乐，之后一路向下滚动即可 · 可随时静音</div>
+  </div>
+
+  <!-- ========== 静音按钮 ========== -->
+  <button id="audio-toggle" title="背景音乐开关">🔊 音乐 开</button>
+
+  <!-- ========== 地图式进度 ========== -->
+  <div id="map" aria-hidden="true">
+    <div class="map-title"><span>长 征 路 线</span><span class="map-current" id="map-current">起点 · 瑞金</span></div>
+    <svg viewBox="0 0 340 250" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="routeGrad" x1="1" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#c9a96a"/>
+          <stop offset="100%" stop-color="#f2d987"/>
+        </linearGradient>
+      </defs>
+      <path id="routeBase" d="M272 208 L222 190 L182 150 L150 128 L112 138 L92 108 L74 70 L108 44 L178 24"/>
+      <path id="route" d="M272 208 L222 190 L182 150 L150 128 L112 138 L92 108 L74 70 L108 44 L178 24"/>
+      <g class="node" data-target="s-depart"      data-name="瑞金"><circle cx="272" cy="208" r="5"/><text x="272" y="226">瑞金</text></g>
+      <g class="node" data-target="s-xiangjiang"  data-name="湘江"><circle cx="222" cy="190" r="5"/><text x="222" y="208">湘江</text></g>
+      <g class="node" data-target="s-zunyi"       data-name="遵义"><circle cx="182" cy="150" r="5"/><text x="182" y="168">遵义</text></g>
+      <g class="node" data-target="s-chishui"     data-name="赤水"><circle cx="150" cy="128" r="5"/><text x="150" y="116">赤水</text></g>
+      <g class="node" data-target="s-jinsha"      data-name="金沙江"><circle cx="112" cy="138" r="5"/><text x="112" y="156">金沙江</text></g>
+      <g class="node" data-target="s-luding"      data-name="泸定"><circle cx="92" cy="108" r="5"/><text x="92" y="96">泸定</text></g>
+      <g class="node" data-target="s-snow"        data-name="夹金山"><circle cx="74" cy="70" r="5"/><text x="74" y="58">雪山</text></g>
+      <g class="node" data-target="s-grass"       data-name="松潘草地"><circle cx="108" cy="44" r="5"/><text x="108" y="32">草地</text></g>
+      <g class="node" data-target="s-huining"     data-name="会宁"><circle cx="178" cy="24" r="5"/><text x="178" y="12">会宁</text></g>
+    </svg>
+  </div>
+
+  <!-- ========== 叙事：起因 ========== -->
+  <section class="scene" id="s-cause">
+    <div class="kicker reveal">起 因 · 为 什 么 非 走 不 可</div>
+    <h2 class="headline reveal d1">到了最后一步</h2>
+    <div class="body">
+      <p class="reveal d2">1933 年秋，蒋介石调集百万大军，其中五十万，直扑中央苏区。</p>
+      <p class="reveal d2">这一次，敌人不再冒进。他们修碉堡、拉封锁线，一步一营，步步为营，要把苏区一圈一圈勒死。</p>
+      <p class="reveal d3">苏区越打越小。粮食见底，盐见底，药品见底。红军最擅长的运动战，被硬生生捆住了手脚，只能和敌人拼消耗——可当时的苏区，拼不起。</p>
+    </div>
+    <div class="quote reveal d4">不是"去远征"，是"不得不走"。</div>
+  </section>
+
+  <!-- ========== 经过 ========== -->
+  <section class="scene" id="s-depart">
+    <div class="kicker reveal">1934 · 十 月</div>
+    <h2 class="headline reveal d1">从瑞金出发</h2>
+    <div class="body">
+      <p class="reveal d2">1934 年 10 月，中央红军八万六千人，趁着夜色渡过于都河。</p>
+      <p class="reveal d2">河上没有桥。是苏区的乡亲们，把自家的门板、床板一块块拆下来，替他们铺出了一条浮桥。</p>
+      <p class="reveal d3">天亮前，队伍走远了，浮桥拆了。留下打游击的人，和送行的人，谁也不敢回头多看一眼。</p>
+    </div>
+    <div class="quote reveal d4">这一走，就是二万五千里；<br/>这一别，很多人再没能回来。</div>
+  </section>
+
+  <section class="scene" id="s-xiangjiang">
+    <div class="kicker reveal">1934 · 冬</div>
+    <h2 class="headline reveal d1">湘江之痛</h2>
+    <div class="body">
+      <p class="reveal d2">第四道封锁线横在湘江边，数倍于己的敌军，已经张好了口袋。</p>
+      <p class="reveal d2">红军在这里血战七天七夜，江水都被染红。渡江之前，全军八万六千；渡江之后，只剩下三万余人。</p>
+      <p class="reveal d3">红三十四师师长陈树湘，率部断后，重伤被俘。他怕被敌人抬去邀功，在担架上用尽最后的力气，扯断了自己的肠子——那年，他二十九岁。</p>
+    </div>
+    <div class="quote reveal d4">"三年不饮湘江水，十年不食湘江鱼。"</div>
+  </section>
+
+  <section class="scene" id="s-zunyi">
+    <div class="kicker reveal">1935 · 一 月</div>
+    <h2 class="headline reveal d1">遵义会议</h2>
+    <div class="body">
+      <p class="reveal d2">走到这里，队伍几乎到了绝境：仗打得憋屈，人心里全是问号——这样下去，还能不能活？</p>
+      <p class="reveal d2">1935 年 1 月，贵州遵义，一次会议整整开了三天。</p>
+      <p class="reveal d3">它纠正了错误的军事指挥，把方向重新校准。从这一刻起，这支队伍不再是盲目地逃，而是清醒地打——这也是后来一切的起点。</p>
+    </div>
+    <div class="quote reveal d4">一次会议，扛住了"生死攸关"这四个字。</div>
+  </section>
+
+  <section class="scene" id="s-chishui">
+    <div class="kicker reveal">1935 · 春</div>
+    <h2 class="headline reveal d1">四渡赤水</h2>
+    <div class="body">
+      <p class="reveal d2">三万多人的队伍，被几十万敌军困在川黔滇的群山之间。硬拼，拼不过；硬跑，跑不掉。</p>
+      <p class="reveal d2">于是四次渡过赤水河：忽东忽西，声东击西，佯攻又回身，把敌人牵着鼻子在山里绕圈。</p>
+      <p class="reveal d3">等敌人终于反应过来，红军早已跳了出去。</p>
+    </div>
+    <div class="quote reveal d4">敌人以为是在追着逃，其实是在被牵着走。</div>
+  </section>
+
+  <section class="scene" id="s-jinsha">
+    <div class="kicker reveal">1935 · 五 月</div>
+    <h2 class="headline reveal d1">巧渡金沙江</h2>
+    <div class="body">
+      <p class="reveal d2">金沙江，水急浪高，两岸是绝壁。追兵就在身后，渡口却只有几只小船。</p>
+      <p class="reveal d2">红军昼夜不停，靠几只木船，连日把全军渡过了天险。</p>
+      <p class="reveal d3">等敌人赶到江边，江面上只剩下一片空荡荡的浪。</p>
+    </div>
+    <div class="quote reveal d4">甩开的不是几里路，是整个包围圈。</div>
+  </section>
+
+  <section class="scene" id="s-luding">
+    <div class="kicker reveal">1935 · 五 月</div>
+    <h2 class="headline reveal d1">飞夺泸定桥</h2>
+    <div class="body">
+      <p class="reveal d2">大渡河天险，水流湍急，两岸峭壁。桥上的木板已被敌人抽走，只剩十三根铁索，悬在江面上。</p>
+      <p class="reveal d2">二十二名勇士组成突击队，攀着冰冷的铁索，在枪林弹雨中一寸一寸向前。</p>
+      <p class="reveal d3">他们身后，是全军的生路。</p>
+    </div>
+    <div class="quote reveal d4">铁索之上，没有退路，也不许回头。</div>
+  </section>
+
+  <section class="scene" id="s-snow">
+    <div class="kicker reveal">1935 · 六 月</div>
+    <h2 class="headline reveal d1">翻越夹金山</h2>
+    <div class="body">
+      <p class="reveal d2">夹金山终年积雪，空气薄得喘不上气。山下还是夏天，山上却是零下的风雪。</p>
+      <p class="reveal d2">战士们穿着单衣草鞋，喝一口烧酒、咬一口辣椒，互相搀扶着往上爬。</p>
+      <p class="reveal d3">有人坐下想歇一口气，就再没能站起来。</p>
+    </div>
+    <div class="quote reveal d4">最冷的地方，站着一群最热的人。</div>
+  </section>
+
+  <section class="scene" id="s-grass">
+    <div class="kicker reveal">1935 · 八 月</div>
+    <h2 class="headline reveal d1">走过松潘草地</h2>
+    <div class="body">
+      <p class="reveal d2">草地不是草原，是一片看着平坦、底下却是沼泽的死地。一脚踩空，人就没了。</p>
+      <p class="reveal d2">没有粮食，就煮皮带、挖野菜；夜里下起冷雨，就背靠背坐着，熬到天亮。</p>
+      <p class="reveal d3">这里没有硝烟，却一样是生死场。</p>
+    </div>
+    <div class="quote reveal d4">"风雨浸衣骨更硬，野菜充饥志越坚。"</div>
+  </section>
+
+  <!-- ========== 结果 ========== -->
+  <section class="scene" id="s-huining">
+    <div class="kicker reveal">1936 · 十 月 · 结 果</div>
+    <h2 class="headline reveal d1">三军会师</h2>
+    <div class="body">
+      <p class="reveal d2">1936 年 10 月，红一、红二、红四方面军在甘肃会宁、将台堡胜利会师。</p>
+      <p class="reveal d2">历时两年，纵横十余省，翻越十几座大山，跨过十几条大河。长征，结束了。</p>
+      <p class="reveal d3">毛泽东说：长征是"宣言书"，是"宣传队"，是"播种机"。</p>
+    </div>
+    <div class="quote reveal d4">二万五千里，他们用脚底板，走出了一部意志的史诗。</div>
+  </section>
+
+  <!-- ========== 收尾升华 ========== -->
+  <section id="finale">
+    <div class="line1 reveal">二万五千里，他们走完了。</div>
+    <div class="divider"></div>
+    <div class="line2 reveal d1">而我们，正走在<br/>他们换来的今天里。</div>
+    <div class="line3 reveal d2">我们走的路，是他们换来的。</div>
+  </section>
+
+  <footer>
+    谨以此页，向二万五千里的每一步致敬<br/>
+    叙事 Demo · 按 PRD v1 制作｜史实细节以权威资料为准，正式版将逐条核实来源
+  </footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- 1. 一次性进入引导页 ---------- */
+  var startBtn = document.getElementById('startBtn');
+  var cover    = document.getElementById('cover');
+  var audioBtn = document.getElementById('audio-toggle');
+  var mapPanel = document.getElementById('map');
+  var started  = false;
+
+  startBtn.addEventListener('click', function(){
+    if(started) return;
+    started = true;
+    startMusic();                 // 用户点击 = 解锁音频
+    cover.classList.add('hide');
+    document.body.classList.remove('locked');
+    audioBtn.classList.add('stay');
+    mapPanel.classList.add('stay');
+    window.scrollTo(0,0);
+    requestAnimationFrame(update);
+  });
+
+  /* ---------- 2. 地图式进度：路线绘制 + 节点点亮 ---------- */
+  var route     = document.getElementById('route');
+  var routeLen  = 0;
+  var nodes     = Array.prototype.slice.call(document.querySelectorAll('.node'));
+  var currentEl = document.getElementById('map-current');
+
+  function measureRoute(){
+    try{ routeLen = route.getTotalLength(); }catch(e){ routeLen = 0; }
+    if(routeLen){
+      route.style.strokeDasharray  = routeLen;
+      route.style.strokeDashoffset = routeLen;
+    }
+  }
+  measureRoute();
+  window.addEventListener('resize', function(){ measureRoute(); update(); });
+
+  function update(){
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - doc.clientHeight;
+    var p = max > 0 ? (doc.scrollTop || window.pageYOffset || 0) / max : 0;
+    if(p < 0) p = 0; if(p > 1) p = 1;
+
+    // 路线按整体滚动进度绘制
+    if(routeLen) route.style.strokeDashoffset = routeLen * (1 - p);
+
+    // 节点按对应场景是否进入视口点亮
+    var vh = window.innerHeight;
+    var lastName = null;
+    nodes.forEach(function(n){
+      var sec = document.getElementById(n.dataset.target);
+      if(!sec) return;
+      var active = sec.getBoundingClientRect().top < vh * 0.55;
+      if(active && !n.classList.contains('active')){
+        n.classList.add('active','pulse');
+        setTimeout(function(){ n.classList.remove('pulse'); }, 1600);
+      }else if(!active && n.classList.contains('active')){
+        n.classList.remove('active');
+      }
+      if(n.classList.contains('active')) lastName = n.dataset.name;
+    });
+    currentEl.textContent = lastName ? ('当前 · ' + lastName) : '起点 · 瑞金';
+  }
+
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if(!ticking){
+      ticking = true;
+      requestAnimationFrame(function(){ update(); ticking = false; });
+    }
+  }, { passive:true });
+
+  /* ---------- 3. 滚动出场动效 ---------- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target); }
+    });
+  }, { threshold:0.2, rootMargin:'0px 0px -8% 0px' });
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+
+  /* ---------- 4. 纯前端 BGM（Web Audio 合成，无需外部文件） ---------- */
+  var ctx = null, master = null, playing = false, muted = false;
+
+  function startMusic(){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) { audioBtn.style.display = 'none'; return; }
+    ctx = new AC();
+
+    master = ctx.createGain();
+    master.gain.value = 0.0;
+    master.connect(ctx.destination);
+
+    // 缓慢的自然渐入
+    var t0 = ctx.currentTime;
+    master.gain.linearRampToValueAtTime(0.085, t0 + 6);
+
+    // 低通滤波器，让音色温暖克制
+    var filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 900;
+    filter.Q.value = 0.6;
+    filter.connect(master);
+
+    // 一个庄重的大调铺底和弦（A2 · E3 · A3 · C#4）
+    var freqs = [110.00, 164.81, 220.00, 277.18];
+    var types = ['sine','sine','triangle','sine'];
+    var oscs = [];
+    freqs.forEach(function(f, i){
+      var o = ctx.createOscillator();
+      o.type = types[i];
+      o.frequency.value = f;
+      o.detune.value = (i % 2 ? 4 : -4);
+
+      var g = ctx.createGain();
+      g.gain.value = 0.32 / (i + 1);
+
+      // 每个声部用不同速度的慢速颤音，制造呼吸感
+      var lfo = ctx.createOscillator();
+      var lfoGain = ctx.createGain();
+      lfo.frequency.value = 0.05 + i * 0.017;
+      lfoGain.gain.value = g.gain.value * 0.45;
+      lfo.connect(lfoGain);
+      lfoGain.connect(g.gain);
+
+      o.connect(g); g.connect(filter);
+      o.start(); lfo.start();
+      oscs.push(o, lfo);
+    });
+
+    // 偶尔飘出一声很轻的高音泛音，像远处的钟
+    var shimmer = ctx.createOscillator();
+    shimmer.type = 'sine';
+    shimmer.frequency.value = 880;
+    var sg = ctx.createGain();
+    sg.gain.value = 0.0;
+    shimmer.connect(sg); sg.connect(master);
+    shimmer.start();
+    (function bell(){
+      if(!ctx) return;
+      var t = ctx.currentTime;
+      sg.gain.cancelScheduledValues(t);
+      sg.gain.setValueAtTime(0.0, t);
+      sg.gain.linearRampToValueAtTime(0.020, t + 2.5);
+      sg.gain.linearRampToValueAtTime(0.0, t + 7);
+      setTimeout(bell, 14000 + Math.random()*10000);
+    })();
+
+    playing = true;
+
+    if(ctx.state === 'suspended') ctx.resume();
+
+    audioBtn.addEventListener('click', function(){
+      if(!ctx) return;
+      muted = !muted;
+      var t = ctx.currentTime;
+      master.gain.cancelScheduledValues(t);
+      master.gain.linearRampToValueAtTime(muted ? 0.0 : 0.085, t + 0.7);
+      audioBtn.textContent = muted ? '🔇 音乐 关' : '🔊 音乐 开';
+      audioBtn.classList.toggle('muted', muted);
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 440" font-family="'Noto Serif SC','STSong',serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a0f10"/>
+      <stop offset="1" stop-color="#1f0708"/>
+    </linearGradient>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#d4af37"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="840" height="440" fill="url(#bg)"/>
+  <text x="420" y="38" fill="#e8c66a" font-size="22" text-anchor="middle" font-weight="bold">数据流图 · 红军长征叙事站 v1</text>
+  <text x="420" y="62" fill="#caa85a" font-size="13" text-anchor="middle">数据从「写进代码的文案」来，到「浏览器渲染的叙事体验」去</text>
+
+  <!-- Box1 创作者 -->
+  <rect x="30" y="140" width="150" height="100" rx="10" fill="#4a1718" stroke="#d4af37" stroke-width="2"/>
+  <text x="105" y="172" fill="#f5e9d0" font-size="15" text-anchor="middle" font-weight="bold">创作者（你）</text>
+  <text x="105" y="196" fill="#e9dcc0" font-size="12" text-anchor="middle">撰写文案 / 设定场景</text>
+  <text x="105" y="216" fill="#e9dcc0" font-size="12" text-anchor="middle">（一次性写进代码）</text>
+
+  <!-- arrow1 -->
+  <line x1="182" y1="190" x2="222" y2="190" stroke="#d4af37" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="202" y="178" fill="#caa85a" font-size="11" text-anchor="middle">手写进代码</text>
+
+  <!-- Box2 静态文件 -->
+  <rect x="230" y="130" width="170" height="120" rx="10" fill="#4a1718" stroke="#d4af37" stroke-width="2"/>
+  <text x="315" y="162" fill="#f5e9d0" font-size="15" text-anchor="middle" font-weight="bold">静态文件</text>
+  <text x="315" y="186" fill="#e9dcc0" font-size="13" text-anchor="middle">demo-v4.html</text>
+  <text x="315" y="208" fill="#e9dcc0" font-size="12" text-anchor="middle">HTML + CSS + JS</text>
+  <text x="315" y="230" fill="#e9dcc0" font-size="12" text-anchor="middle">内容·样式·逻辑 三合一</text>
+
+  <!-- arrow2 -->
+  <line x1="402" y1="190" x2="447" y2="190" stroke="#d4af37" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="424" y="178" fill="#caa85a" font-size="11" text-anchor="middle">打开·滚动·点击</text>
+
+  <!-- Box3 浏览器 -->
+  <rect x="455" y="110" width="180" height="160" rx="10" fill="#5a1c1d" stroke="#e8c66a" stroke-width="2"/>
+  <text x="545" y="142" fill="#f5e9d0" font-size="15" text-anchor="middle" font-weight="bold">用户浏览器（前端）</text>
+  <text x="545" y="172" fill="#e9dcc0" font-size="12" text-anchor="middle">· 按滚动位置切换幕</text>
+  <text x="545" y="196" fill="#e9dcc0" font-size="12" text-anchor="middle">· Web Audio 合成 BGM</text>
+  <text x="545" y="220" fill="#e9dcc0" font-size="12" text-anchor="middle">· 地图进度随滚动点亮</text>
+  <text x="545" y="244" fill="#e9dcc0" font-size="12" text-anchor="middle">· 大字逐行揭示</text>
+
+  <!-- arrow3 -->
+  <line x1="637" y1="190" x2="682" y2="190" stroke="#d4af37" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="659" y="178" fill="#caa85a" font-size="11" text-anchor="middle">渲染</text>
+
+  <!-- Box4 屏幕 -->
+  <rect x="690" y="150" width="130" height="90" rx="10" fill="#4a1718" stroke="#d4af37" stroke-width="2"/>
+  <text x="755" y="182" fill="#f5e9d0" font-size="15" text-anchor="middle" font-weight="bold">屏幕</text>
+  <text x="755" y="206" fill="#e9dcc0" font-size="12" text-anchor="middle">滚动叙事体验</text>
+  <text x="755" y="228" fill="#e9dcc0" font-size="12" text-anchor="middle">画面 + 声音</text>
+
+  <!-- future dashed -->
+  <text x="430" y="316" fill="#9a8a6a" font-size="12" text-anchor="middle">── v1 暂无 · 未来可选 ──</text>
+  <rect x="250" y="330" width="360" height="80" rx="10" fill="none" stroke="#7a6a4a" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="430" y="362" fill="#cdbb95" font-size="14" text-anchor="middle" font-weight="bold">后端 API  ◀────▶  数据库</text>
+  <text x="430" y="388" fill="#b3a584" font-size="12" text-anchor="middle">真实音乐托管 / 访问统计 / 用户留言</text>
+</svg>

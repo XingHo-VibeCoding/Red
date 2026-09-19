@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>长征 · 二万五千里｜场景叙事 v3（悬浮地图 + 粗细文案）</title>
+<style>
+  :root{
+    --gold:#d4af37;
+    --gold-soft:#c9a96a;
+    --ink:#0b0606;
+    --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun",serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:var(--serif);background:var(--ink);color:#efe4cf;
+    line-height:1.9;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  }
+  body.locked{overflow:hidden;height:100vh;}
+
+  /* ================= 一次性进入引导页 ================= */
+  #cover{
+    position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:8vh 6vw;
+    background:radial-gradient(circle at 50% 38%, rgba(122,20,24,.60), transparent 62%),
+               linear-gradient(180deg,#0d0707 0%,#2a0d0f 55%,#4a0d10 100%);
+    transition:opacity 1s ease,visibility 1s ease;
+  }
+  #cover.hide{opacity:0;visibility:hidden;}
+  .cover-seal{width:88px;height:88px;border:2px solid var(--gold);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;color:var(--gold);
+    font-size:34px;letter-spacing:2px;margin-bottom:30px;box-shadow:0 0 46px rgba(212,175,55,.28);}
+  #cover h1{font-size:clamp(56px,13vw,150px);color:var(--gold);letter-spacing:16px;
+    text-indent:16px;font-weight:700;line-height:1.1;text-shadow:0 4px 34px rgba(0,0,0,.65);}
+  #cover .cover-sub{margin-top:16px;font-size:clamp(14px,2.2vw,19px);color:var(--gold-soft);letter-spacing:8px;}
+  #cover .hp-hint{margin-top:44px;display:inline-flex;align-items:center;gap:12px;padding:12px 24px;
+    border:1px solid rgba(212,175,55,.45);border-radius:40px;color:var(--gold-soft);
+    font-size:clamp(13px,1.8vw,16px);letter-spacing:2px;}
+  #cover .hp-hint .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);}
+  .start-btn{margin-top:30px;padding:16px 60px;border:1px solid var(--gold);border-radius:4px;
+    background:transparent;color:var(--gold);font-family:var(--serif);font-size:clamp(16px,2.2vw,20px);
+    letter-spacing:8px;cursor:pointer;transition:background .4s,color .4s,box-shadow .4s;}
+  .start-btn:hover{background:var(--gold);color:#2a0d0f;box-shadow:0 0 40px rgba(212,175,55,.4);}
+  #cover .cover-note{margin-top:22px;font-size:12.5px;color:rgba(201,169,106,.7);letter-spacing:2px;}
+
+  /* ================= 静音按钮 ================= */
+  #audio-toggle{position:fixed;top:22px;right:24px;z-index:900;padding:9px 18px;
+    border:1px solid rgba(212,175,55,.5);border-radius:30px;background:rgba(11,6,6,.5);
+    backdrop-filter:blur(6px);color:var(--gold-soft);font-family:var(--serif);font-size:13px;
+    letter-spacing:2px;cursor:pointer;opacity:0;visibility:hidden;
+    transition:opacity .8s,color .3s,border-color .3s;}
+  #audio-toggle.stay{opacity:1;visibility:visible;}
+  #audio-toggle:hover{color:var(--gold);border-color:var(--gold);}
+  #audio-toggle.muted{color:rgba(201,169,106,.45);border-color:rgba(212,175,55,.25);}
+
+  /* ================= 电影感：颗粒 + 暗角 + 过场大字 ================= */
+  #grain{position:fixed;inset:0;z-index:800;pointer-events:none;opacity:.05;mix-blend-mode:overlay;}
+  #vig{position:fixed;inset:0;z-index:799;pointer-events:none;
+    background:radial-gradient(circle at 50% 45%, transparent 52%, rgba(0,0,0,.58) 100%);}
+  #flash{position:fixed;inset:0;z-index:820;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+  #flash span{font-family:var(--serif);font-weight:700;font-size:min(40vw,480px);line-height:1;
+    color:#e7c766;opacity:0;letter-spacing:0;transform:scale(1.18);text-shadow:0 0 60px rgba(212,175,55,.35);}
+  #flash.go span{animation:flashword 2.6s ease-out both;}
+  @keyframes flashword{
+    0%{opacity:0;transform:scale(1.16);}
+    16%{opacity:.13;transform:scale(1.02);}
+    50%{opacity:.10;}
+    100%{opacity:0;transform:scale(.98);}
+  }
+
+  /* ================= 悬浮地图（点图标才弹出） ================= */
+  #mapfab{position:fixed;left:26px;bottom:26px;z-index:880;width:56px;height:56px;border-radius:50%;
+    border:1px solid rgba(212,175,55,.55);background:rgba(11,6,6,.55);backdrop-filter:blur(8px);
+    color:var(--gold);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    opacity:0;visibility:hidden;transition:opacity .8s,transform .3s,box-shadow .3s;box-shadow:0 6px 24px rgba(0,0,0,.5);}
+  #mapfab.stay{opacity:1;visibility:visible;}
+  #mapfab:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(212,175,55,.25);}
+  #mapfab svg{width:26px;height:26px;}
+  #mappanel{position:fixed;left:26px;bottom:96px;z-index:880;width:312px;padding:14px 14px 10px;
+    background:linear-gradient(180deg, rgba(16,10,10,.9), rgba(16,10,10,.72));
+    border:1px solid rgba(212,175,55,.28);border-radius:12px;backdrop-filter:blur(10px);
+    box-shadow:0 18px 50px rgba(0,0,0,.6);
+    opacity:0;visibility:hidden;transform:translateY(14px) scale(.97);
+    transition:opacity .45s ease,transform .45s cubic-bezier(.22,.61,.36,1),visibility .45s;}
+  #mappanel.open{opacity:1;visibility:visible;transform:none;}
+  #mappanel .map-title{font-size:11px;letter-spacing:4px;color:rgba(201,169,106,.9);
+    display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  #mappanel .map-current{font-size:12px;letter-spacing:2px;color:var(--gold);}
+  #mappanel svg{display:block;width:100%;height:auto;}
+  #mappanel .map-hint{font-size:10px;letter-spacing:2px;color:rgba(201,169,106,.45);text-align:center;padding:4px 0 4px;}
+  #route{fill:none;stroke:url(#routeGrad);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;
+    filter:drop-shadow(0 0 5px rgba(212,175,55,.55));}
+  #routeBase{fill:none;stroke:rgba(212,175,55,.16);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+  .node circle{fill:#1d1010;stroke:rgba(212,175,55,.5);stroke-width:1.6;transition:fill .6s,stroke .6s;}
+  .node text{font-family:var(--serif);font-size:11px;letter-spacing:1px;fill:rgba(212,175,55,.42);
+    text-anchor:middle;transition:fill .6s;}
+  .node.active circle{fill:var(--gold);stroke:var(--gold);filter:drop-shadow(0 0 7px rgba(212,175,55,.9));}
+  .node.active text{fill:var(--gold);}
+
+  /* ================= 右侧章节指示 ================= */
+  #rail{position:fixed;right:26px;top:50%;transform:translateY(-50%);z-index:850;
+    display:flex;flex-direction:column;gap:16px;opacity:0;transition:opacity 1s ease .4s;pointer-events:none;}
+  #rail.stay{opacity:1;}
+  #rail .tick{display:flex;align-items:center;justify-content:flex-end;gap:10px;}
+  #rail .tick-name{font-size:11px;letter-spacing:3px;color:rgba(201,169,106,.28);transition:color .5s ease;}
+  #rail .tick-dot{width:16px;height:2px;background:rgba(201,169,106,.26);border-radius:2px;transition:all .5s ease;}
+  #rail .tick.on .tick-dot{width:30px;background:var(--gold);box-shadow:0 0 10px rgba(212,175,55,.8);}
+  #rail .tick.on .tick-name{color:var(--gold);}
+
+  /* ================= 固定舞台 ================= */
+  #stage{position:fixed;inset:0;z-index:0;background:#0b0606;overflow:hidden;will-change:transform;}
+  .stage-scene{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity 1.15s ease;}
+  .stage-scene.on{opacity:1;visibility:visible;animation:settle 1.4s cubic-bezier(.22,.61,.36,1) both;}
+  @keyframes settle{from{transform:scale(1.045);}to{transform:scale(1);}}
+  .stage-scene svg{display:block;width:100%;height:100%;}
+  .stage-scene.on svg{animation:kbA 34s ease-in-out infinite alternate;}
+  .stage-scene.kb-b.on svg{animation-name:kbB;}
+  .stage-scene.kb-c.on svg{animation-name:kbC;}
+  @keyframes kbA{from{transform:scale(1.03) translate(0,0);}to{transform:scale(1.09) translate(-22px,-12px);}}
+  @keyframes kbB{from{transform:scale(1.09) translate(14px,10px);}to{transform:scale(1.03) translate(0,0);}}
+  @keyframes kbC{from{transform:scale(1.05) translate(-16px,8px);}to{transform:scale(1.09) translate(18px,-10px);}}
+  .stage-scene:not(.on) *{animation-play-state:paused !important;}
+
+  /* ================= 叙事文字层（粗细交替） ================= */
+  #story{position:relative;z-index:2;}
+  .story{min-height:150vh;display:flex;justify-content:center;align-items:flex-start;
+    padding:15vh 6vw 0;position:relative;}
+  .story::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg, rgba(8,5,5,.88) 0%, rgba(8,5,5,.5) 36%, rgba(8,5,5,0) 60%);}
+  .panel{position:relative;z-index:1;}
+  .story.prose .panel{max-width:640px;text-align:left;margin-left:7vw;margin-right:auto;}
+  .story.bold .panel{max-width:860px;text-align:center;margin:0 auto;}
+  .kicker{color:var(--gold);letter-spacing:9px;font-size:clamp(11px,1.5vw,14px);margin-bottom:20px;}
+  .headline{font-size:clamp(36px,6.4vw,80px);color:#f8efd8;font-weight:700;letter-spacing:6px;
+    line-height:1.22;margin-bottom:26px;text-shadow:0 6px 34px rgba(0,0,0,.8),0 2px 8px rgba(0,0,0,.9);}
+  .story.bold .headline{font-size:clamp(42px,7.6vw,100px);letter-spacing:8px;}
+  .body{font-size:clamp(15px,1.9vw,19px);color:#ddcfb4;text-shadow:0 2px 12px rgba(0,0,0,.95);}
+  .body p{margin-bottom:16px;}
+  .story.bold .body{max-width:620px;margin:0 auto;font-size:clamp(16px,2vw,20px);color:#e6d9bd;}
+  .quote{margin-top:26px;padding-left:20px;border-left:3px solid var(--gold);
+    font-size:clamp(16px,2.1vw,22px);color:var(--gold-soft);letter-spacing:2px;
+    line-height:1.8;text-shadow:0 2px 12px rgba(0,0,0,.95);}
+  .story.bold .quote{border-left:none;padding-left:0;text-align:center;}
+  .verses{margin-top:30px;text-align:center;}
+  .verses div{font-size:clamp(18px,2.6vw,30px);color:#f0e2bf;letter-spacing:4px;
+    line-height:2.1;text-shadow:0 3px 16px rgba(0,0,0,.95);}
+  .verses div b{color:var(--gold);font-weight:700;}
+
+  .reveal{opacity:0;transform:translateY(44px);filter:blur(6px);
+    transition:opacity 1.2s cubic-bezier(.22,.61,.36,1),transform 1.2s cubic-bezier(.22,.61,.36,1),filter 1.2s ease;}
+  .reveal.show{opacity:1;transform:none;filter:blur(0);}
+  .d1{transition-delay:.12s;} .d2{transition-delay:.24s;} .d3{transition-delay:.36s;} .d4{transition-delay:.48s;} .d5{transition-delay:.6s;}
+
+  /* ================= 收尾升华 ================= */
+  #finale{position:relative;z-index:3;min-height:112vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:14vh 8vw;
+    background:linear-gradient(180deg,#1d1010 0%,#6a1f24 40%,#b5722d 66%,#f4ecd8 100%);}
+  #finale .line1{font-size:clamp(22px,3.6vw,40px);color:#f8eed8;letter-spacing:5px;
+    line-height:1.6;text-shadow:0 3px 20px rgba(0,0,0,.5);}
+  #finale .divider{width:64px;height:2px;background:var(--gold);margin:40px 0;}
+  #finale .line2{font-size:clamp(24px,4.4vw,52px);color:#2e1a10;letter-spacing:6px;font-weight:700;}
+  #finale .line3{margin-top:64px;font-size:clamp(14px,2vw,18px);color:rgba(58,36,24,.82);letter-spacing:4px;}
+
+  footer{position:relative;z-index:3;background:#0b0606;color:rgba(201,169,106,.55);
+    text-align:center;padding:44px 8vw 52px;font-size:12px;letter-spacing:3px;line-height:2;}
+
+  /* ================= 动效 ================= */
+  .gunfire{position:absolute;inset:0;pointer-events:none;opacity:0;
+    background:radial-gradient(circle at 62% 52%, rgba(255,235,190,.9), rgba(255,120,60,.35) 30%, transparent 62%);
+    animation:gunfire 5.5s steps(1,end) infinite;}
+  @keyframes gunfire{
+    0%,100%{opacity:0;} 8%{opacity:.85;} 10%{opacity:0;} 13%{opacity:.5;} 15%{opacity:0;}
+    41%{opacity:0;} 43%{opacity:.7;} 45%{opacity:0;} 72%{opacity:0;} 74%{opacity:.55;} 76%{opacity:0;}
+  }
+  @keyframes marchR{from{transform:translateX(-320px);}to{transform:translateX(1560px);}}
+  @keyframes marchL{from{transform:translateX(1560px);}to{transform:translateX(-320px);}}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-2.6px);}}
+  @keyframes drift{from{transform:translateX(0);}to{transform:translateX(-140px);}}
+  @keyframes twinkle{0%,100%{opacity:.18;}50%{opacity:.95;}}
+  @keyframes snow{from{transform:translate(0,-40px);}to{transform:translate(-26px,760px);}}
+  @keyframes rain{from{transform:translateY(-70px);}to{transform:translateY(760px);}}
+  @keyframes ember{0%{transform:translate(0,0);opacity:0;}12%{opacity:1;}100%{transform:translate(-44px,-300px);opacity:0;}}
+  @keyframes dustf{0%{transform:translate(0,0);opacity:0;}20%{opacity:.8;}100%{transform:translate(-34px,-170px);opacity:0;}}
+  @keyframes wind{0%{transform:translateX(0);opacity:0;}12%{opacity:.55;}100%{transform:translateX(-240px);opacity:0;}}
+  @keyframes mistdrift{0%{transform:translateX(-60px);}100%{transform:translateX(70px);}}
+  @keyframes flicker{0%,100%{opacity:.7;}42%{opacity:1;}56%{opacity:.55;}70%{opacity:.95;}}
+  @keyframes sweep{0%{transform:rotate(-20deg);}100%{transform:rotate(20deg);}}
+  @keyframes chainSway{0%,100%{transform:rotate(-.5deg);}50%{transform:rotate(.5deg);}}
+  @keyframes crawl{from{transform:translateX(-300px) rotate(80deg);}to{transform:translateX(300px) rotate(80deg);}}
+  @keyframes climb{from{transform:translate(0,0);}to{transform:translate(-34px,-22px);}}
+  @keyframes wave{0%,100%{transform:skewY(0deg) scaleX(1);}50%{transform:skewY(5deg) scaleX(.92);}}
+  @keyframes sunrise{from{transform:translateY(0);}to{transform:translateY(-96px);}}
+  @keyframes boatBob{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-4px) rotate(1deg);}}
+  @keyframes dashflow{to{stroke-dashoffset:-88;}}
+
+  .col.march-r{animation:marchR 46s linear infinite;}
+  .col.march-l{animation:marchL 46s linear infinite;}
+  .fig{animation:bob .9s ease-in-out infinite;}
+  .wave{animation:drift 9s linear infinite;}
+  .moon{animation:flicker 7s ease-in-out infinite;}
+  .mist{filter:blur(22px);animation:mistdrift 26s ease-in-out infinite alternate;}
+  .flow path{animation:dashflow 2.6s linear infinite;}
+  .sweep{animation:sweep 8s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%;}
+  .chains{animation:chainSway 4.5s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 40%;}
+  .crawler{animation:crawl 13s ease-in-out infinite alternate;}
+  .climbcol{animation:climb 9s ease-in-out infinite alternate;}
+  .banner{animation:wave 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:0% 50%;}
+  .sun{animation:sunrise 16s ease-in-out infinite alternate;}
+  .glow{animation:flicker 5s ease-in-out infinite;}
+  .boat{animation:boatBob 3.6s ease-in-out infinite;}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;}
+    .reveal{opacity:1;transform:none;filter:none;transition:none;}
+    html{scroll-behavior:auto;}
+  }
+  @media (max-width:760px){
+    #rail{display:none;}
+    #mapfab{left:14px;bottom:14px;width:48px;height:48px;}
+    #mappanel{left:14px;bottom:74px;width:244px;}
+    .story::before{background:linear-gradient(180deg, rgba(8,5,5,.94) 0%, rgba(8,5,5,.7) 45%, rgba(8,5,5,.15) 70%);}
+    .story.prose .panel{margin-left:5vw;margin-right:5vw;}
+  }
+</style>
+</head>
+<body class="locked">
+
+  <div id="cover">
+    <div class="cover-seal">红</div>
+    <h1>长征</h1>
+    <div class="cover-sub">红 军 · 二 万 五 千 里</div>
+    <div class="hp-hint"><span class="dot"></span>建议佩戴耳机，沉浸式体验这段路</div>
+    <button class="start-btn" id="startBtn">开 始 体 验</button>
+    <div class="cover-note">点击后将开启背景音乐，之后一路向下滚动即可 · 左下角可随时展开路线图</div>
+  </div>
+
+  <button id="audio-toggle" title="背景音乐开关">🔊 音乐 开</button>
+  <div id="vig"></div>
+  <div id="flash"><span id="flash-char"></span></div>
+
+  <button id="mapfab" aria-label="展开长征路线图">
+    <svg viewBox="0 0 24 24"><path d="M3 18 L8 12 L13 15.5 L18 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/><circle cx="3" cy="18" r="2.2" fill="currentColor"/><circle cx="18" cy="6.5" r="2.2" fill="currentColor"/></svg>
+  </button>
+
+  <div id="mappanel">
+    <div class="map-title"><span>长 征 路 线 · 进 度</span><span class="map-current" id="map-current">起 · 起因</span></div>
+    <svg viewBox="0 0 340 250" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="routeGrad" x1="1" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#c9a96a"/><stop offset="100%" stop-color="#f2d987"/>
+        </linearGradient>
+      </defs>
+      <path id="routeBase" d="M272 208 L222 190 L182 150 L150 128 L112 138 L92 108 L74 70 L108 44 L178 24"/>
+      <path id="route" d="M272 208 L222 190 L182 150 L150 128 L112 138 L92 108 L74 70 L108 44 L178 24"/>
+      <g class="node" data-s="1" data-name="瑞金"><circle cx="272" cy="208" r="5"/><text x="272" y="226">瑞金</text></g>
+      <g class="node" data-s="2" data-name="湘江"><circle cx="222" cy="190" r="5"/><text x="222" y="208">湘江</text></g>
+      <g class="node" data-s="3" data-name="遵义"><circle cx="182" cy="150" r="5"/><text x="182" y="168">遵义</text></g>
+      <g class="node" data-s="4" data-name="赤水"><circle cx="150" cy="128" r="5"/><text x="150" y="116">赤水</text></g>
+      <g class="node" data-s="5" data-name="金沙江"><circle cx="112" cy="138" r="5"/><text x="112" y="156">金沙江</text></g>
+      <g class="node" data-s="6" data-name="泸定"><circle cx="92" cy="108" r="5"/><text x="92" y="96">泸定</text></g>
+      <g class="node" data-s="7" data-name="雪山"><circle cx="74" cy="70" r="5"/><text x="74" y="58">雪山</text></g>
+      <g class="node" data-s="8" data-name="草地"><circle cx="108" cy="44" r="5"/><text x="108" y="32">草地</text></g>
+      <g class="node" data-s="9" data-name="会宁"><circle cx="178" cy="24" r="5"/><text x="178" y="12">会宁</text></g>
+    </svg>
+    <div class="map-hint">再点图标或点页面空白处收起</div>
+  </div>
+
+  <nav id="rail" aria-hidden="true"></nav>
+
+  <!-- ================= 固定舞台 ================= -->
+  <div id="stage">
+
+    <!-- 0 起因 · 围困绝境 -->
+    <div class="stage-scene kb-a" data-i="0">
+      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="s0sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#090404"/><stop offset="55%" stop-color="#1e0d0f"/><stop offset="1" stop-color="#3a1214"/>
+          </linearGradient>
+          <radialGradient id="s0glow" cx="50%" cy="72%" r="52%">
+            <stop offset="0" stop-color="#7a1418" stop-opacity=".5"/><stop offset="1" stop-color="#7a1418" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#s0sky)"/>
+        <rect width="1200" height="700" fill="url(#s0glow)"/>
+        <g class="parts" data-type="star" data-n="24"></g>
+        <ellipse class="mist" cx="300" cy="240" rx="300" ry="80" fill="#1c0d10" opacity=".55"/>
+        <ellipse class="mist" cx="920" cy="300" rx="340" ry="90" fill="#241014" opacity=".5" style="animation-duration:34s"/>
+        <g class="sweep"><path d="M640 700 L500 286 L780 286 Z" fill="#7a1418" opacity=".12"/></g>
+        <g fill="#0f0809">
+          <rect x="-20" y="440" width="1240" height="46"/>
+          <rect x="40" y="418" width="62" height="24"/><rect x="152" y="418" width="62" height="24"/>
+          <rect x="264" y="418" width="62" height="24"/><rect x="376" y="418" width="62" height="24"/>
+          <rect x="488" y="418" width="62" height="24"/><rect x="600" y="418" width="62" height="24"/>
+          <rect x="712" y="418" width="62" height="24"/><rect x="824" y="418" width="62" height="24"/>
+          <rect x="936" y="418" width="62" height="24"/><rect x="1048" y="418" width="62" height="24"/>
+          <rect x="1160" y="418" width="62" height="24"/>
+        </g>
+        <rect y="486" width="1200" height="214" fill="#0b0607"/>
+        <g stroke="#2a1416" stroke-width="2.4" fill="none" opacity=".85">
+          <path d="M-20 604 L120 574 L260 604 L400 574 L540 604 L680 574 L820 604 L960 574 L1100 604 L1240 574"/>
+          <path d="M-20 626 L120 596 L260 626 L400 596 L540 626 L680 596 L820 626 L960 596 L1100 626 L1240 596"/>
+        </g>
+        <g fill="#2a1416"><rect x="117" y="566" width="6" height="64"/><rect x="397" y="566" width="6" height="64"/><rect x="677" y="566" width="6" height="64"/><rect x="957" y="566" width="6" height="64"/></g>
+        <g class="figs" data-n="7" data-x="440" data-y="450" data-dx="46" data-scale="1.05"></g>
+      </svg>
+    </div>
+
+    <!-- 1 出发 · 于都河夜渡 -->
+    <div class="stage-scene kb-b" data-i="1">
+      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="s1sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#060b15"/><stop offset="70%" stop-color="#122036"/><stop offset="1" stop-color="#1c2f4a"/>
+          </linearGradient>
+          <linearGradient id="s1water" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#0e1c2c"/><stop offset="1" stop-color="#050a12"/>
+          </linearGradient>
+          <radialGradient id="s1moon" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="#e8dfc4" stop-opacity=".5"/><stop offset="1" stop-color="#e8dfc4" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="s1shim" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#efe6cb" stop-opacity=".55"/><stop offset="1" stop-color="#efe6cb" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#s1sky)"/>
+        <g class="parts" data-type="star" data-n="60"></g>
+        <circle cx="940" cy="126" r="120" fill="url(#s1moon)"/>
+        <circle class="moon" cx="940" cy="126" r="44" fill="#efe6cb" opacity=".9"/>
+        <path d="M0 452 L170 352 L320 436 L470 340 L660 452 L830 366 L990 436 L1200 348 L1200 700 L0 700 Z" fill="#0a1220"/>
+        <ellipse class="mist" cx="420" cy="420" rx="380" ry="60" fill="#16283e" opacity=".4"/>
+        <rect y="486" width="1200" height="214" fill="url(#s1water)"/>
+        <rect class="glow" x="912" y="486" width="56" height="214" fill="url(#s1shim)" opacity=".28"/>
+        <g stroke="#2b4766" stroke-width="2" fill="none" opacity=".5">
+          <path class="wave" d="M-140 540 q40 -8 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0"/>
+          <path class="wave" d="M-140 590 q40 -8 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0" style="animation-duration:12s"/>
+          <path class="wave" d="M-140 642 q40 -8 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0" style="animation-duration:15s"/>
+        </g>
+        <ellipse class="moon" cx="940" cy="540" rx="58" ry="5" fill="#e8dfc4" opacity=".22"/>
+        <rect y="472" width="1200" height="13" fill="#2a1d14"/>
+        <g stroke="#3a2a1c" stroke-width="2" opacity=".8">
+          <path d="M40 472 v13 M120 472 v13 M200 472 v13 M280 472 v13 M360 472 v13 M440 472 v13 M520 472 v13 M600 472 v13 M680 472 v13 M760 472 v13 M840 472 v13 M920 472 v13 M1000 472 v13 M1080 472 v13 M1160 472 v13"/>
+        </g>
+        <g class="figs" data-n="5" data-x="40" data-y="432" data-dx="40" data-scale="1"></g>
+        <g class="figs col march-r" data-n="16" data-x="-200" data-y="434" data-dx="46" data-scale="1"></g>
+      </svg>
+    </div>
+
+    <!-- 2 湘江 · 血战 -->
+    <div class="stage-scene kb-c" data-i="2">
+      <div class="gunfire"></div>
+      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="s2sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#180a0c"/><stop offset="60%" stop-color="#43151a"/><stop offset="1" stop-color="#6b1c1e"/>
+          </linearGradient>
+          <linearGradient id="s2water" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#8e1f22"/><stop offset="1" stop-color="#3d0d10"/>
+          </linearGradient>
+          <radialGradient id="s2fire" cx="50%" cy="100%" r="80%">
+            <stop offset="0" stop-color="#ff8a4a" stop-opacity=".5"/><stop offset="1" stop-color="#ff8a4a" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#s2sky)"/>
+        <ellipse cx="600" cy="430" rx="700" ry="150" fill="url(#s2fire)"/>
+        <g fill="#2a0f12" opacity=".6"><ellipse cx="240" cy="180" rx="260" ry="70"/><ellipse cx="880" cy="130" rx="300" ry="80"/></g>
+        <ellipse class="mist" cx="620" cy="220" rx="420" ry="80" fill="#43151a" opacity=".55" style="animation-duration:30s"/>
+        <g class="parts" data-type="ember" data-n="40"></g>
+        <rect y="430" width="1200" height="270" fill="url(#s2water)"/>
+        <g stroke="#c2524f" stroke-width="2.2" fill="none" opacity=".45">
+          <path class="wave" d="M-140 492 q40 -9 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0"/>
+          <path class="wave" d="M-140 556 q40 -9 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0" style="animation-duration:11s"/>
+          <path class="wave" d="M-140 626 q40 -9 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0" style="animation-duration:14s"/>
+        </g>
+        <g class="figs" data-n="6" data-x="180" data-y="452" data-dx="90" data-scale="1.02"></g>
+        <g class="figs" data-n="4" data-x="620" data-y="536" data-dx="110" data-scale=".95"></g>
+        <g class="figs" data-n="4" data-x="290" data-y="556" data-dx="150" data-scale="1" data-rot="82"></g>
+        <g class="figs" data-n="3" data-x="760" data-y="470" data-dx="130" data-scale="1" data-rot="78"></g>
+      </svg>
+    </div>
+
+    <!-- 3 遵义 · 会议灯火 -->
+    <div class="stage-scene kb-a" data-i="3">
+      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="s3room" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#120a08"/><stop offset="1" stop-color="#241310"/>
+          </linearGradient>
+          <linearGradient id="s3win" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffd98a"/><stop offset="1" stop-color="#c9772c"/>
+          </linearGradient>
+          <radialGradient id="s3lamp" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="#ffd27a" stop-opacity=".8"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#s3room)"/>
+        <g>
+          <rect x="820" y="180" width="270" height="250" rx="6" fill="url(#s3win)" opacity=".92"/>
+          <g stroke="#2a1a12" stroke-width="7"><path d="M955 180 v250 M820 305 h270"/></g>
+          <rect x="812" y="172" width="286" height="266" rx="8" fill="none" stroke="#4a3020" stroke-width="9"/>
+        </g>
+        <path class="glow" d="M820 200 L1090 200 L640 660 L180 660 Z" fill="#d4af37" opacity=".06"/>
+        <g class="parts" data-type="dust" data-n="26"></g>
+        <circle cx="300" cy="150" r="120" fill="url(#s3lamp)"/>
+        <g class="glow"><circle cx="300" cy="150" r="15" fill="#ffe6a8"/><rect x="298" y="60" width="3" height="80" fill="#2a1a12"/></g>
+        <rect x="330" y="520" width="560" height="22" rx="5" fill="#170e0a"/>
+        <g fill="#110a07"><rect x="352" y="542" width="12" height="120"/><rect x="856" y="542" width="12" height="120"/></g>
+        <g class="figs" data-n="6" data-x="368" data-y="492" data-dx="104" data-scale="1.12" data-seat="1"></g>
+      </svg>
+    </div>
+
+    <!-- 4 四渡赤水 · 机动 -->
+    <div class="stage-scene kb-b" data-i="4">
+      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="s4sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#0a0b12"/><stop offset="1" stop-color="#1b2030"/>
+          </linearGradient>
+          <linearGradient id="s4water" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#24405c"/><stop offset="1" stop-color="#0a1220"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#s4sky)"/>
+        <ellipse class="mist" cx="360" cy="260" rx="360" ry="70" fill="#1b2434" opacity=".5"/>
+        <ellipse class="mist" cx="900" cy="330" rx="320" ry="60" fill="#20293c" opacity=".45" style="animation-duration:32s"/>
+        <path d="M0 470 L300 400 L1240 316 L1240 700 L0 700 Z" fill="url(#s4water)"/>
+        <g stroke="#4a6f92" stroke-width="2" fill="none" opacity=".4">
+          <path class="wave" d="M-140 500 q40 -8 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0"/>
+          <path class="wave" d="M-140 580 q40 -8 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0" style="animation-duration:12s"/>
+        </g>
+        <g class="flow" stroke="#c9a96a" stroke-width="1.8" fill="none" stroke-dasharray="10 12" opacity=".4">
+          <path d="M60 380 Q300 314 540 386"/>
+          <path d="M120 320 Q360 400 620 316"/>
+          <path d="M700 400 Q900 330 1150 396"/>
+          <path d="M660 340 Q840 260 1100 318"/>
+        </g>
+        <g class="figs col march-r" data-n="11" data-x="-220" data-y="352" data-dx="46" data-scale="1"></g>
+        <g class="figs col march-l" data-n="11" data-x="60" data-y="452" data-dx="46" data-scale="1.05"></g>
+      </svg>
+    </div>
+
+    <!-- 5 金沙江 · 巧渡 -->
+    <div class="stage-scene kb-c" data-i="5">
+      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="s5sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#080a10"/><stop offset="1" stop-color="#1a2434"/>
+          </linearGradient>
+          <linearGradient id="s5water" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#20415e"/><stop offset="1" stop-color="#070d16"/>
+          </linearGradient>
+          <linearGradient id="s5shaft" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#bcd4ea" stop-opacity=".28"/><stop offset="1" stop-color="#bcd4ea" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#s5sky)"/>
+        <g class="parts" data-type="star" data-n="34"></g>
+        <polygon class="glow" points="560,0 660,0 780,470 440,470" fill="url(#s5shaft)" opacity=".22"/>
+        <rect y="430" width="1200" height="270" fill="url(#s5water)"/>
+        <g stroke="#3f6f96" stroke-width="2" fill="none" opacity=".4">
+          <path class="wave" d="M-140 490 q40 -9 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0"/>
+          <path class="wave" d="M-140 566 q40 -9 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0" style="animation-duration:12s"/>
+          <path class="wave" d="M-140 640 q40 -9 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0" style="animation-duration:15s"/>
+        </g>
+        <ellipse class="mist" cx="600" cy="470" rx="460" ry="60" fill="#2a4560" opacity=".4" style="animation-duration:36s"/>
+        <path d="M0 120 L250 210 L320 700 L0 700 Z" fill="#0a0705"/>
+        <path d="M1200 90 L960 200 L880 700 L1200 700 Z" fill="#0a0705"/>
+        <g transform="translate(430,510)"><g class="boat">
+          <path d="M-52 0 Q0 22 52 0 L42 -8 L-42 -8 Z" fill="#1c1410"/>
+          <rect x="-2" y="-62" width="3" height="54" fill="#1c1410"/>
+          <g class="figs" data-n="2" data-x="-20" data-y="-42" data-dx="28" data-scale=".62"></g>
+        </g></g>
+        <g transform="translate(760,566)"><g class="boat" style="animation-delay:.6s">
+          <path d="M-46 0 Q0 20 46 0 L38 -7 L-38 -7 Z" fill="#1c1410"/>
+          <g class="figs" data-n="2" data-x="-16" data-y="-38" data-dx="26" data-scale=".58"></g>
+        </g></g>
+        <g transform="translate(1010,470)"><g class="boat" style="animation-delay:1.2s">
+          <path d="M-40 0 Q0 18 40 0 L32 -6 L-32 -6 Z" fill="#1c1410"/>
+          <g class="figs" data-n="2" data-x="-14" data-y="-34" data-dx="24" data-scale=".54"></g>
+        </g></g>
+      </svg>
+    </div>
+
+    <!-- 6 泸定桥 · 铁索 -->
+    <div class="stage-scene kb-a" data-i="6">
+      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="s6sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#0d0a0e"/><stop offset="1" stop-color="#2a1a1c"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#s6sky)"/>
+        <g class="parts" data-type="ember" data-n="26"></g>
+        <g class="parts" data-type="wind" data-n="12"></g>
+        <rect x="300" y="330" width="600" height="370" fill="#050303"/>
+        <ellipse class="mist" cx="600" cy="560" rx="380" ry="70" fill="#180f12" opacity=".6" style="animation-duration:30s"/>
+        <path d="M0 150 L300 260 L300 700 L0 700 Z" fill="#0b0706"/>
+        <path d="M1200 130 L900 250 L900 700 L1200 700 Z" fill="#0b0706"/>
+        <g class="chains">
+          <g stroke="#4a352a" stroke-width="2.6" fill="none">
+            <path d="M280 322 Q600 396 920 322"/>
+            <path d="M280 336 Q600 412 920 336"/>
+            <path d="M280 350 Q600 428 920 350"/>
+            <path d="M280 364 Q600 444 920 364"/>
+            <path d="M280 378 Q600 460 920 378"/>
+          </g>
+          <g stroke="#3a2820" stroke-width="2" opacity=".7"><path d="M360 334 v34 M440 348 v34 M520 362 v34 M600 372 v34 M680 362 v34 M760 348 v34 M840 334 v34"/></g>
+        </g>
+        <g transform="translate(600,392)"><g class="crawler"><g class="fig"><circle cx="12" cy="6" r="4.3"/><path d="M7.4 10.8 Q12 8.3 16.6 10.8 L16 23 L8 23 Z"/><path d="M8 23 L6.6 38 L10.4 38 L12 25.5 L13.6 38 L17.4 38 L16 23 Z"/><path d="M15.6 11.8 L21.8 6.8 L22.6 8.6 L16.4 13.6 Z"/></g></g></g>
+      </svg>
+    </div>
+
+    <!-- 7 雪山 · 翻越夹金山 -->
+    <div class="stage-scene kb-b" data-i="7">
+      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="s7sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#1a2434"/><stop offset="60%" stop-color="#3d4f66"/><stop offset="1" stop-color="#8fa2b6"/>
+          </linearGradient>
+          <linearGradient id="s7peak" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#eef3f8"/><stop offset="1" stop-color="#8fa4bb"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#s7sky)"/>
+        <path d="M0 470 L240 190 L400 380 L600 150 L820 400 L1000 250 L1200 460 L1200 700 L0 700 Z" fill="#5b7192" opacity=".75"/>
+        <ellipse class="mist" cx="420" cy="420" rx="420" ry="60" fill="#9fb2c6" opacity=".3" style="animation-duration:36s"/>
+        <path d="M0 520 L200 300 L360 470 L600 250 L860 480 L1040 340 L1200 520 L1200 700 L0 700 Z" fill="url(#s7peak)"/>
+        <g class="climbcol"><g class="figs" data-n="12" data-x="920" data-y="566" data-dx="-62" data-dy="-26" data-scale=".85"></g></g>
+        <g class="parts" data-type="snow" data-n="110"></g>
+        <g class="parts" data-type="wind" data-n="8"></g>
+      </svg>
+    </div>
+
+    <!-- 8 草地 · 松潘 -->
+    <div class="stage-scene kb-c" data-i="8">
+      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="s8sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#1c2020"/><stop offset="60%" stop-color="#333c34"/><stop offset="1" stop-color="#4a5340"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#s8sky)"/>
+        <ellipse class="mist" cx="400" cy="300" rx="420" ry="80" fill="#2a322a" opacity=".6"/>
+        <ellipse class="mist" cx="900" cy="380" rx="380" ry="70" fill="#333c34" opacity=".5" style="animation-duration:34s"/>
+        <rect y="440" width="1200" height="260" fill="#22281e"/>
+        <rect y="440" width="1200" height="26" fill="#2c3426"/>
+        <g fill="#5f6f66" opacity=".35">
+          <ellipse cx="260" cy="520" rx="120" ry="9"/><ellipse cx="700" cy="560" rx="150" ry="10"/><ellipse cx="1020" cy="510" rx="110" ry="8"/>
+        </g>
+        <g stroke="#39422f" stroke-width="2.4" fill="none" opacity=".85">
+          <path d="M120 470 q6 -22 14 -30 M132 470 q2 -26 -6 -34 M144 470 q6 -18 10 -26"/>
+          <path d="M520 472 q6 -24 14 -32 M532 472 q2 -28 -6 -36"/>
+          <path d="M900 468 q6 -20 12 -28 M912 468 q2 -24 -6 -32 M924 468 q6 -18 10 -24"/>
+          <path d="M1120 474 q6 -22 12 -30 M1132 474 q2 -26 -6 -34"/>
+        </g>
+        <g class="figs" data-n="9" data-x="-40" data-y="418" data-dx="112" data-scale=".98"></g>
+        <g class="figs" data-n="2" data-x="640" data-y="470" data-dx="27" data-scale="1" data-seat="1"></g>
+        <g class="parts" data-type="rain" data-n="90"></g>
+      </svg>
+    </div>
+
+    <!-- 9 会师 · 会宁 -->
+    <div class="stage-scene kb-a" data-i="9">
+      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="s9sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#241018"/><stop offset="45%" stop-color="#8a3a22"/><stop offset="78%" stop-color="#d89a45"/><stop offset="1" stop-color="#f2d79a"/>
+          </linearGradient>
+          <radialGradient id="s9sun" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="#fff2c8" stop-opacity=".95"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="1200" height="700" fill="url(#s9sky)"/>
+        <g class="sun">
+          <circle cx="600" cy="470" r="200" fill="url(#s9sun)"/>
+          <g opacity=".2" fill="#ffe9ae">
+            <polygon points="600,470 -200,120 -200,260"/>
+            <polygon points="600,470 1400,80 1400,240"/>
+            <polygon points="600,470 200,-100 340,-100"/>
+            <polygon points="600,470 1000,-100 1140,-100"/>
+          </g>
+          <circle cx="600" cy="470" r="64" fill="#ffe9ae"/>
+        </g>
+        <ellipse class="mist" cx="320" cy="430" rx="360" ry="60" fill="#d89a45" opacity=".3"/>
+        <rect y="520" width="1200" height="180" fill="#6b4426"/>
+        <g class="parts" data-type="spark" data-n="30"></g>
+        <g class="figs col march-r" data-n="12" data-x="-240" data-y="482" data-dx="46" data-scale="1"></g>
+        <g class="figs col march-l" data-n="12" data-x="100" data-y="482" data-dx="46" data-scale="1"></g>
+        <g class="figs" data-n="7" data-x="470" data-y="482" data-dx="42" data-scale="1.05"></g>
+        <g transform="translate(540,482)"><g class="flag"><rect x="0" y="-78" width="3" height="78" fill="#2a1a10"/><path class="banner" d="M3 -76 Q34 -66 66 -74 L66 -40 Q34 -32 3 -42 Z" fill="#c0201f"/></g></g>
+        <g transform="translate(672,482)"><g class="flag"><rect x="0" y="-70" width="3" height="70" fill="#2a1a10"/><path class="banner" d="M3 -68 Q32 -58 62 -66 L62 -34 Q32 -26 3 -36 Z" fill="#c0201f" style="animation-delay:.7s"/></g></g>
+        <g transform="translate(606,482)"><g class="flag"><rect x="0" y="-88" width="3" height="88" fill="#2a1a10"/><path class="banner" d="M3 -86 Q36 -76 70 -84 L70 -48 Q36 -40 3 -50 Z" fill="#c0201f" style="animation-delay:1.3s"/></g></g>
+      </svg>
+    </div>
+
+  </div><!-- /stage -->
+
+  <!-- ================= 叙事文字层（粗细交替） ================= -->
+  <main id="story">
+
+    <!-- 0 起因 · 细 -->
+    <section class="story prose">
+      <div class="panel">
+        <div class="kicker reveal">壹 · 起 因 ｜ 一 九 三 三 之 冬</div>
+        <h2 class="headline reveal d1">被围住的苏区</h2>
+        <div class="body">
+          <p class="reveal d2">1933 年秋起，蒋介石调集约百万兵力，其中五十万直扑中央苏区。这一回，他们不急着打——修碉堡，拉铁丝网，一条封锁线接着一条，像给这片土地，一道一道地套上枷。</p>
+          <p class="reveal d3">堡垒步步向前，苏区步步后退。广昌失守，兴国告急；粮食见了底，盐比银贵，伤员没有药。打惯了运动战的红军，被逼着去拼消耗——可这片被围住的土地，拼不起。</p>
+        </div>
+        <div class="quote reveal d4">长征不是一次远征，是一次被逼出来的转移。</div>
+      </div>
+    </section>
+
+    <!-- 1 出发 · 粗 -->
+    <section class="story bold">
+      <div class="panel">
+        <div class="kicker reveal">贰 · 出 发 ｜ 1934 · 10 · 于 都 河</div>
+        <h2 class="headline reveal d1">八万六千人，<br/>一夜过河</h2>
+        <div class="body">
+          <p class="reveal d2">浮桥，是乡亲们拆了自家门板铺的。</p>
+          <p class="reveal d3">天亮前，桥拆了，人走远了。</p>
+        </div>
+        <div class="quote reveal d4">这一别，很多人再没能回来。</div>
+      </div>
+    </section>
+
+    <!-- 2 湘江 · 细 -->
+    <section class="story prose">
+      <div class="panel">
+        <div class="kicker reveal">叁 · 血 战 ｜ 1934 · 冬 · 第 四 道 封 锁 线</div>
+        <h2 class="headline reveal d1">湘江，七天七夜</h2>
+        <div class="body">
+          <p class="reveal d2">数倍于己的敌军在湘江边张好了口袋。为了掩护纵队过江，红军在两岸血战七天七夜——江水泛红，浮桥几次被打断，又几次被架起。</p>
+          <p class="reveal d3">渡江之前，全军八万六千人；渡江之后，只剩三万余人。担任后卫的红三十四师几乎拼光——师长陈树湘重伤被俘，在担架上绞断了自己的肠子。那年，他二十九岁。</p>
+        </div>
+        <div class="quote reveal d4">"三年不饮湘江水，十年不食湘江鱼。"</div>
+      </div>
+    </section>
+
+    <!-- 3 遵义 · 粗 -->
+    <section class="story bold">
+      <div class="panel">
+        <div class="kicker reveal">肆 · 转 折 ｜ 1935 · 1 · 遵 义</div>
+        <h2 class="headline reveal d1">三天，<br/>校准了方向</h2>
+        <div class="body">
+          <p class="reveal d2">一盏灯，一张桌，一次会议。</p>
+          <p class="reveal d3">此后，这支队不再盲目地逃，而是清醒地打。</p>
+        </div>
+        <div class="quote reveal d4">—— 生死攸关的转折点</div>
+      </div>
+    </section>
+
+    <!-- 4 四渡赤水 · 细 -->
+    <section class="story prose">
+      <div class="panel">
+        <div class="kicker reveal">伍 · 机 动 ｜ 1935 · 春 · 川 黔 滇</div>
+        <h2 class="headline reveal d1">三万人，牵走四十万人</h2>
+        <div class="body">
+          <p class="reveal d2">三万对几十万，硬拼是绝路。于是红军四次渡过赤水河：一渡、二渡，回师再战；三渡佯动，四渡突然东进——忽东忽西，声东击西。</p>
+          <p class="reveal d3">敌人被牵着在群山里来回绕圈。等他们反应过来时，红军已经掉头南渡乌江，跳出合围。</p>
+        </div>
+        <div class="quote reveal d4">他们以为在追一场溃逃，其实在对一盘下定了的棋。</div>
+      </div>
+    </section>
+
+    <!-- 5 金沙江 · 粗 -->
+    <section class="story bold">
+      <div class="panel">
+        <div class="kicker reveal">陆 · 突 围 ｜ 1935 · 5 · 金 沙 江</div>
+        <h2 class="headline reveal d1">七只小船，<br/>渡了一支军队</h2>
+        <div class="body">
+          <p class="reveal d2">昼夜不停，七天七夜。</p>
+          <p class="reveal d3">追兵赶到江边时，只剩下一江浪。</p>
+        </div>
+        <div class="quote reveal d4">跳出合围的这一步，叫"巧"。</div>
+      </div>
+    </section>
+
+    <!-- 6 泸定桥 · 细 -->
+    <section class="story prose">
+      <div class="panel">
+        <div class="kicker reveal">柒 · 天 险 ｜ 1935 · 5 · 大 渡 河</div>
+        <h2 class="headline reveal d1">十三根铁索</h2>
+        <div class="body">
+          <p class="reveal d2">桥板被拆，只剩十三根铁索，横在大渡河上。红四团一昼夜急行军二百四十里赶到桥头；二十二名突击队员攀着冰冷的铁索，冒着枪火，一寸一寸向前爬。</p>
+          <p class="reveal d3">他们身后，是整个红军的生路。</p>
+        </div>
+        <div class="quote reveal d4">铁索之上，没有退路，也不许回头。</div>
+      </div>
+    </section>
+
+    <!-- 7 雪山 · 粗 -->
+    <section class="story bold">
+      <div class="panel">
+        <div class="kicker reveal">捌 · 绝 境 ｜ 1935 · 6 · 夹 金 山</div>
+        <h2 class="headline reveal d1">最冷的地方，<br/>站着一群最热的人</h2>
+        <div class="body">
+          <p class="reveal d2">单衣，草鞋，风雪。</p>
+          <p class="reveal d3">有人坐下想歇一口气，就再没能站起来。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 草地 · 细 -->
+    <section class="story prose">
+      <div class="panel">
+        <div class="kicker reveal">玖 · 生 死 场 ｜ 1935 · 8 · 松 潘 草 地</div>
+        <h2 class="headline reveal d1">一片看着平坦的"死地"</h2>
+        <div class="body">
+          <p class="reveal d2">草地不是草原：表面是草，底下是沼泽，一脚踩空，就再难拉出来。皮带煮了，野菜挖尽；夜里冷雨浇下来，战士们背靠背坐着，用体温把彼此焐到天亮。</p>
+          <p class="reveal d3">这里没有枪声，却一样是生死场。</p>
+        </div>
+        <div class="quote reveal d4">"风雨浸衣骨更硬，野菜充饥志越坚。"</div>
+      </div>
+    </section>
+
+    <!-- 9 会师 · 细+收束 -->
+    <section class="story prose">
+      <div class="panel">
+        <div class="kicker reveal">拾 · 结 果 ｜ 1936 · 10 · 会 宁</div>
+        <h2 class="headline reveal d1">三军过后尽开颜</h2>
+        <div class="body">
+          <p class="reveal d2">1936 年 10 月，红一、红二、红四方面军在甘肃会宁和将台堡会师。两年，纵横十余省，长驱二万五千里——长征，结束了。</p>
+        </div>
+        <div class="verses">
+          <div class="reveal d3">长征是<b>宣言书</b>，</div>
+          <div class="reveal d4">长征是<b>宣传队</b>，</div>
+          <div class="reveal d5">长征是<b>播种机</b>。</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= 收尾升华 ================= -->
+  <section id="finale">
+    <div class="line1 reveal">二万五千里，他们用脚走完了。</div>
+    <div class="divider"></div>
+    <div class="line2 reveal d1">而我们脚下的路，<br/>是他们一步一步换来的。</div>
+    <div class="line3 reveal d2">把这段路，讲给更多人听。</div>
+  </section>
+
+  <footer>
+    谨以此页，向二万五千里的每一步致敬<br/>
+    场景叙事 v3 · 按 PRD v1 制作（悬浮地图版）｜史实细节以权威资料为准，正式版将逐条核实来源
+  </footer>
+
+<script>
+(function(){
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+
+  function el(tag, attrs){
+    var e = document.createElementNS(NS, tag);
+    if(attrs){ for(var k in attrs){ e.setAttribute(k, attrs[k]); } }
+    return e;
+  }
+
+  /* ---------- 剪影人物 ---------- */
+  function newFig(seat){
+    var g = el('g', {class:'fig'});
+    if(seat){
+      g.appendChild(el('circle', {cx:12, cy:8, r:4.3}));
+      g.appendChild(el('path', {d:'M6.4 13 Q12 10 17.6 13 L19 27 L5 27 Z'}));
+    }else{
+      g.appendChild(el('circle', {cx:12, cy:6, r:4.3}));
+      g.appendChild(el('path', {d:'M7.4 10.8 Q12 8.3 16.6 10.8 L16 23 L8 23 Z'}));
+      g.appendChild(el('path', {d:'M8 23 L6.6 38 L10.4 38 L12 25.5 L13.6 38 L17.4 38 L16 23 Z'}));
+      g.appendChild(el('path', {d:'M15.6 11.8 L21.8 6.8 L22.6 8.6 L16.4 13.6 Z'}));
+    }
+    g.style.fill = '#0a0706';
+    return g;
+  }
+
+  function buildFigures(){
+    var groups = document.querySelectorAll('.figs');
+    Array.prototype.forEach.call(groups, function(g){
+      var n   = parseInt(g.dataset.n || '6', 10);
+      var x   = parseFloat(g.dataset.x || '0');
+      var y   = parseFloat(g.dataset.y || '0');
+      var dx  = parseFloat(g.dataset.dx !== undefined ? g.dataset.dx : '44');
+      var dy  = parseFloat(g.dataset.dy !== undefined ? g.dataset.dy : '0');
+      var sc  = parseFloat(g.dataset.scale !== undefined ? g.dataset.scale : '1');
+      var rot = parseFloat(g.dataset.rot !== undefined ? g.dataset.rot : '0');
+      var seat = g.dataset.seat === '1';
+      var frag = document.createDocumentFragment();
+      for(var i = 0; i < n; i++){
+        var outer = el('g', {transform:'translate(' + (x + i*dx) + ',' + (y + i*dy) + ') rotate(' + rot + ') scale(' + sc + ')'});
+        var fig = newFig(seat);
+        fig.style.animationDelay = (i * 0.13).toFixed(2) + 's';
+        outer.appendChild(fig);
+        frag.appendChild(outer);
+      }
+      g.appendChild(frag);
+    });
+  }
+
+  /* ---------- 粒子 ---------- */
+  function buildParticles(){
+    var groups = document.querySelectorAll('.parts');
+    Array.prototype.forEach.call(groups, function(g){
+      var type = g.dataset.type || 'star';
+      var n    = parseInt(g.dataset.n || '30', 10);
+      var frag = document.createDocumentFragment();
+      for(var i = 0; i < n; i++){
+        var x = Math.random() * 1200;
+        var node = null;
+        if(type === 'star'){
+          node = el('circle', {cx:x, cy: Math.random()*380, r:(0.6+Math.random()*1.3).toFixed(2), fill:'#f0e6c8'});
+          node.style.animation = 'twinkle ' + (2+Math.random()*4).toFixed(1) + 's ease-in-out infinite';
+          node.style.animationDelay = (Math.random()*8).toFixed(2) + 's';
+        }else if(type === 'snow'){
+          node = el('circle', {cx:x, cy: Math.random()*500, r:(0.9+Math.random()*1.8).toFixed(2), fill:'#ffffff'});
+          node.style.animation = 'snow ' + (6+Math.random()*9).toFixed(1) + 's linear infinite';
+          node.style.animationDelay = (Math.random()*10).toFixed(2) + 's';
+          node.style.opacity = (0.35+Math.random()*0.55).toFixed(2);
+        }else if(type === 'rain'){
+          node = el('rect', {x:x, y:-40, width:1.2, height:(14+Math.random()*16).toFixed(1), fill:'#aebfd6'});
+          node.style.animation = 'rain ' + (0.5+Math.random()*0.5).toFixed(2) + 's linear infinite';
+          node.style.animationDelay = (Math.random()*1.2).toFixed(2) + 's';
+          node.style.opacity = (0.18+Math.random()*0.3).toFixed(2);
+        }else if(type === 'ember'){
+          node = el('circle', {cx:200+Math.random()*800, cy:300+Math.random()*280, r:(0.7+Math.random()*1.7).toFixed(2), fill:'#ffb15a'});
+          node.style.animation = 'ember ' + (3+Math.random()*4).toFixed(1) + 's ease-out infinite';
+          node.style.animationDelay = (Math.random()*6).toFixed(2) + 's';
+        }else if(type === 'spark'){
+          node = el('circle', {cx:300+Math.random()*600, cy:320+Math.random()*180, r:(0.8+Math.random()*1.6).toFixed(2), fill:'#fff0bf'});
+          node.style.animation = 'ember ' + (3+Math.random()*4).toFixed(1) + 's ease-out infinite';
+          node.style.animationDelay = (Math.random()*6).toFixed(2) + 's';
+        }else if(type === 'dust'){
+          node = el('circle', {cx:260+Math.random()*790, cy:250+Math.random()*280, r:(0.8+Math.random()*1.6).toFixed(2), fill:'#ffe9ae'});
+          node.style.animation = 'dustf ' + (6+Math.random()*5).toFixed(1) + 's ease-out infinite';
+          node.style.animationDelay = (Math.random()*8).toFixed(2) + 's';
+          node.style.opacity = '0';
+        }else if(type === 'wind'){
+          node = el('rect', {x:Math.random()*1200, y:80+Math.random()*540, width:(70+Math.random()*90).toFixed(0), height:1.6, fill:'#ffffff'});
+          node.style.animation = 'wind ' + (1.2+Math.random()*1.1).toFixed(2) + 's linear infinite';
+          node.style.animationDelay = (Math.random()*4).toFixed(2) + 's';
+          node.style.opacity = '.18';
+        }
+        if(node){ frag.appendChild(node); }
+      }
+      g.appendChild(frag);
+    });
+  }
+
+  /* ---------- 元素 ---------- */
+  var startBtn = document.getElementById('startBtn');
+  var cover    = document.getElementById('cover');
+  var audioBtn = document.getElementById('audio-toggle');
+  var rail     = document.getElementById('rail');
+  var stage    = document.getElementById('stage');
+  var storySections = document.querySelectorAll('.story');
+  var scenes   = document.querySelectorAll('.stage-scene');
+  var flashEl  = document.getElementById('flash');
+  var flashChar= document.getElementById('flash-char');
+  var mapFab   = document.getElementById('mapfab');
+  var mapPanel = document.getElementById('mappanel');
+  var route    = document.getElementById('route');
+  var mapCurrent = document.getElementById('map-current');
+  var mapNodes = document.querySelectorAll('#mappanel .node');
+  var started  = false;
+
+  /* ---------- 右侧章节指示 ---------- */
+  var CH = ['起因','出发','湘江','遵义','四渡赤水','金沙江','泸定桥','雪山','草地','会师'];
+  var WORDS = ['围','别','血','灯','变','跃','索','雪','泽','会'];
+  CH.forEach(function(name){
+    var d = document.createElement('div');
+    d.className = 'tick';
+    var nm = document.createElement('span'); nm.className='tick-name'; nm.textContent=name;
+    var dot = document.createElement('span'); dot.className='tick-dot';
+    d.appendChild(nm); d.appendChild(dot);
+    rail.appendChild(d);
+  });
+  var ticks = rail.querySelectorAll('.tick');
+
+  /* ---------- 过场大字 ---------- */
+  function flashWord(i){
+    if(!started) return;
+    flashChar.textContent = WORDS[i] || '';
+    flashEl.classList.remove('go');
+    void flashEl.offsetWidth;
+    flashEl.classList.add('go');
+  }
+
+  /* ---------- 幕切换 ---------- */
+  var curIdx = -1;
+  function setScene(i, silent){
+    if(i === curIdx) return;
+    var prev = curIdx;
+    curIdx = i;
+    Array.prototype.forEach.call(scenes, function(sc,k){ sc.classList.toggle('on', k===i); });
+    Array.prototype.forEach.call(ticks, function(t,k){ t.classList.toggle('on', k===i); });
+    if(prev !== -1 || !silent){ flashWord(i); }
+    updateMapNodes();
+  }
+
+  function updateStage(){
+    var vh = window.innerHeight, mid = vh * 0.5;
+    var best = 0, bestD = Infinity;
+    Array.prototype.forEach.call(storySections, function(s, idx){
+      var r = s.getBoundingClientRect();
+      var d = Math.abs(r.top + r.height/2 - mid);
+      if(d < bestD){ bestD = d; best = idx; }
+    });
+    setScene(best);
+  }
+
+  /* ---------- 悬浮地图 ---------- */
+  var routeLen = 0;
+  function measureRoute(){
+    try{ routeLen = route.getTotalLength(); }catch(e){ routeLen = 0; }
+    if(routeLen){
+      route.style.strokeDasharray = routeLen;
+      route.style.strokeDashoffset = routeLen;
+    }
+  }
+  function updateRoute(){
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - doc.clientHeight;
+    var p = max > 0 ? (doc.scrollTop || window.pageYOffset || 0) / max : 0;
+    if(p < 0) p = 0; if(p > 1) p = 1;
+    if(routeLen){ route.style.strokeDashoffset = routeLen * (1 - p); }
+  }
+  function updateMapNodes(){
+    Array.prototype.forEach.call(mapNodes, function(nd){
+      nd.classList.toggle('active', curIdx >= parseInt(nd.dataset.s, 10));
+    });
+    if(mapCurrent){ mapCurrent.textContent = '当前 · ' + (CH[curIdx] || '起因'); }
+  }
+  mapFab.addEventListener('click', function(e){
+    e.stopPropagation();
+    mapPanel.classList.toggle('open');
+  });
+  document.addEventListener('click', function(e){
+    if(!mapPanel.classList.contains('open')) return;
+    if(mapPanel.contains(e.target) || mapFab.contains(e.target)) return;
+    mapPanel.classList.remove('open');
+  });
+
+  /* ---------- 滚动出场动效 ---------- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target); }
+    });
+  }, {threshold:0.2, rootMargin:'0px 0px -8% 0px'});
+  Array.prototype.forEach.call(document.querySelectorAll('.reveal'), function(x){ io.observe(x); });
+
+  /* ---------- 滚动节流 ---------- */
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if(!ticking){
+      ticking = true;
+      requestAnimationFrame(function(){ updateStage(); updateRoute(); ticking = false; });
+    }
+  }, {passive:true});
+  window.addEventListener('resize', function(){ measureRoute(); updateStage(); updateRoute(); });
+
+  /* ---------- 鼠标视差（桌面） ---------- */
+  if(window.matchMedia && window.matchMedia('(pointer:fine)').matches &&
+     !(window.matchMedia('(prefers-reduced-motion: reduce)').matches)){
+    var tx = 0, ty = 0, cx = 0, cy = 0;
+    window.addEventListener('mousemove', function(e){
+      tx = (e.clientX / window.innerWidth - 0.5) * 16;
+      ty = (e.clientY / window.innerHeight - 0.5) * 10;
+    }, {passive:true});
+    (function loop(){
+      cx += (tx - cx) * 0.06;
+      cy += (ty - cy) * 0.06;
+      stage.style.transform = 'translate(' + cx.toFixed(2) + 'px,' + cy.toFixed(2) + 'px) scale(1.03)';
+      requestAnimationFrame(loop);
+    })();
+  }
+
+  /* ---------- 开始体验 ---------- */
+  startBtn.addEventListener('click', function(){
+    if(started) return;
+    started = true;
+    startMusic();
+    cover.classList.add('hide');
+    document.body.classList.remove('locked');
+    audioBtn.classList.add('stay');
+    rail.classList.add('stay');
+    mapFab.classList.add('stay');
+    window.scrollTo(0, 0);
+    setScene(0, true);
+    flashWord(0);
+    updateStage();
+    updateRoute();
+  });
+
+  /* ---------- 纯前端 BGM ---------- */
+  var ctx = null, master = null, muted = false;
+  function startMusic(){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC){ audioBtn.style.display = 'none'; return; }
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.0;
+    master.connect(ctx.destination);
+    var t0 = ctx.currentTime;
+    master.gain.linearRampToValueAtTime(0.085, t0 + 6);
+
+    var filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 900;
+    filter.Q.value = 0.6;
+    filter.connect(master);
+
+    var freqs = [110.00, 164.81, 220.00, 277.18];
+    var types = ['sine','sine','triangle','sine'];
+    freqs.forEach(function(f, i){
+      var o = ctx.createOscillator();
+      o.type = types[i];
+      o.frequency.value = f;
+      o.detune.value = (i % 2 ? 4 : -4);
+      var g = ctx.createGain();
+      g.gain.value = 0.32 / (i + 1);
+      var lfo = ctx.createOscillator();
+      var lfoGain = ctx.createGain();
+      lfo.frequency.value = 0.05 + i * 0.017;
+      lfoGain.gain.value = g.gain.value * 0.45;
+      lfo.connect(lfoGain);
+      lfoGain.connect(g.gain);
+      o.connect(g); g.connect(filter);
+      o.start(); lfo.start();
+    });
+
+    var shimmer = ctx.createOscillator();
+    shimmer.type = 'sine';
+    shimmer.frequency.value = 880;
+    var sg = ctx.createGain();
+    sg.gain.value = 0.0;
+    shimmer.connect(sg); sg.connect(master);
+    shimmer.start();
+    (function bell(){
+      if(!ctx) return;
+      var t = ctx.currentTime;
+      sg.gain.cancelScheduledValues(t);
+      sg.gain.setValueAtTime(0.0, t);
+      sg.gain.linearRampToValueAtTime(0.020, t + 2.5);
+      sg.gain.linearRampToValueAtTime(0.0, t + 7);
+      setTimeout(bell, 14000 + Math.random()*10000);
+    })();
+
+    if(ctx.state === 'suspended'){ ctx.resume(); }
+
+    audioBtn.addEventListener('click', function(){
+      if(!ctx) return;
+      muted = !muted;
+      var t = ctx.currentTime;
+      master.gain.cancelScheduledValues(t);
+      master.gain.linearRampToValueAtTime(muted ? 0.0 : 0.085, t + 0.7);
+      audioBtn.textContent = muted ? '🔇 音乐 关' : '🔊 音乐 开';
+      audioBtn.classList.toggle('muted', muted);
+    });
+  }
+
+  /* ---------- 初始化 ---------- */
+  buildFigures();
+  buildParticles();
+  measureRoute();
+  setScene(0, true);
+})();
+</script>
+</body>
+</html>
