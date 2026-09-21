@@ -1,444 +1,747 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>长征 · 红军叙事</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>长征 · 沉浸叙事</title>
 <style>
-  :root {
-    --crimson: #7a1418;
-    --crimson-deep: #4a0d10;
-    --gold: #d4af37;
-    --gold-soft: #c9a96a;
-    --ink: #1a0e0e;
-    --ink-2: #2b1414;
-    --parchment: #f4ecd8;
-    --parchment-ink: #3a2418;
-    --serif: "Noto Serif SC", "Songti SC", "STSong", "SimSun", "Source Han Serif SC", serif;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: var(--serif);
-    background: var(--ink);
-    color: #f0e6d2;
-    line-height: 1.9;
-    overflow-x: hidden;
-  }
-
-  /* 滚动进度条 */
-  #progress {
-    position: fixed;
-    top: 0; left: 0;
-    height: 3px;
-    width: 0%;
-    background: linear-gradient(90deg, var(--gold), var(--gold-soft));
-    z-index: 999;
-    transition: width 0.1s linear;
-  }
-
-  /* ---------- 开场 ---------- */
-  .hero {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    background:
-      radial-gradient(circle at 50% 35%, rgba(122,20,24,0.55), transparent 60%),
-      linear-gradient(180deg, var(--ink) 0%, var(--crimson-deep) 100%);
-    position: relative;
-  }
-  .hero .seal {
-    width: 92px; height: 92px;
-    border: 2px solid var(--gold);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--gold);
-    font-size: 30px;
-    letter-spacing: 2px;
-    margin-bottom: 28px;
-    box-shadow: 0 0 40px rgba(212,175,55,0.25);
-  }
-  .hero h1 {
-    font-size: clamp(56px, 13vw, 150px);
-    color: var(--gold);
-    letter-spacing: 14px;
-    text-indent: 14px;
-    font-weight: 700;
-    text-shadow: 0 4px 30px rgba(0,0,0,0.6);
-  }
-  .hero .sub {
-    margin-top: 18px;
-    font-size: clamp(15px, 2.4vw, 20px);
-    color: var(--gold-soft);
-    letter-spacing: 6px;
-  }
-  .hero .scroll-hint {
-    position: absolute;
-    bottom: 42px;
-    color: var(--gold-soft);
-    font-size: 13px;
-    letter-spacing: 4px;
-    animation: float 2.4s ease-in-out infinite;
-  }
-  @keyframes float {
-    0%,100% { transform: translateY(0); opacity: 0.5; }
-    50% { transform: translateY(10px); opacity: 1; }
-  }
-
-  /* ---------- 叙事段 ---------- */
-  .chapter {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 14vh 8vw;
-    position: relative;
-    background: linear-gradient(180deg, var(--crimson-deep), var(--ink-2));
-    border-top: 1px solid rgba(212,175,55,0.12);
-  }
-  .chapter .year {
-    font-size: clamp(40px, 9vw, 110px);
-    color: rgba(212,175,55,0.22);
-    font-weight: 700;
-    letter-spacing: 4px;
-    line-height: 1;
-  }
-  .chapter .tag {
-    color: var(--gold);
-    letter-spacing: 8px;
-    font-size: 15px;
-    margin: 18px 0 14px;
-  }
-  .chapter h2 {
-    font-size: clamp(28px, 5vw, 48px);
-    color: #f4ead0;
-    letter-spacing: 3px;
-    margin-bottom: 22px;
-  }
-  .chapter p {
-    max-width: 760px;
-    font-size: clamp(16px, 2.2vw, 19px);
-    color: #d9cbb0;
-  }
-  .chapter .pull {
-    margin-top: 30px;
-    padding-left: 20px;
-    border-left: 3px solid var(--gold);
-    color: var(--gold-soft);
-    font-style: italic;
-    font-size: clamp(15px, 2vw, 18px);
-    max-width: 640px;
-  }
-
-  /* 进入视口动效 */
-  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 1s ease, transform 1s ease; }
-  .reveal.show { opacity: 1; transform: none; }
-
-  /* ---------- 转场：醒来 ---------- */
-  .awaken {
-    min-height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center;
-    padding: 12vh 8vw;
-    background: linear-gradient(180deg, var(--ink-2) 0%, #6b2024 45%, #b9742e 70%, var(--parchment) 100%);
-  }
-  .awaken .line1 {
-    font-size: clamp(20px, 3.4vw, 34px);
-    color: #f4ead0;
-    letter-spacing: 3px;
-    max-width: 720px;
-    text-shadow: 0 2px 16px rgba(0,0,0,0.4);
-  }
-  .awaken .divider {
-    width: 60px; height: 2px;
-    background: var(--gold);
-    margin: 34px 0;
-  }
-  .awaken .line2 {
-    font-size: clamp(22px, 4vw, 40px);
-    color: var(--parchment-ink);
-    letter-spacing: 4px;
-    font-weight: 700;
-  }
-
-  /* ---------- 浏览态（正常态）---------- */
-  .browse {
-    background: var(--parchment);
-    color: var(--parchment-ink);
-    padding: 11vh 7vw 14vh;
-  }
-  .section-head {
-    text-align: center;
-    margin-bottom: 54px;
-  }
-  .section-head .kicker {
-    color: var(--crimson);
-    letter-spacing: 8px;
-    font-size: 14px;
-  }
-  .section-head h3 {
-    font-size: clamp(30px, 5vw, 46px);
-    letter-spacing: 4px;
-    margin-top: 10px;
-    color: var(--crimson-deep);
-  }
-  .section-head .rule {
-    width: 70px; height: 3px;
-    background: var(--crimson);
-    margin: 18px auto 0;
-  }
-
-  /* 英雄故事卡片 */
-  .heroes {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 22px;
-    max-width: 1100px;
-    margin: 0 auto 90px;
-  }
-  .card {
-    background: #fffaf0;
-    border: 1px solid rgba(122,20,24,0.18);
-    border-radius: 6px;
-    padding: 26px 24px;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
-    overflow: hidden;
-  }
-  .card::before {
-    content: "";
-    position: absolute; top: 0; left: 0;
-    width: 4px; height: 100%;
-    background: var(--crimson);
-  }
-  .card:hover { transform: translateY(-6px); box-shadow: 0 14px 34px rgba(74,13,16,0.16); }
-  .card .name {
-    font-size: 24px;
-    color: var(--crimson-deep);
-    letter-spacing: 2px;
-    margin-bottom: 4px;
-  }
-  .card .role {
-    font-size: 13px;
-    color: var(--gold);
-    letter-spacing: 2px;
-    margin-bottom: 14px;
-  }
-  .card .brief { font-size: 15px; color: #5a4636; }
-  .card .more {
-    margin-top: 16px;
-    font-size: 13px;
-    color: var(--crimson);
-    letter-spacing: 2px;
-  }
-  .card .detail {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.45s ease, margin-top 0.45s ease;
-    font-size: 14px;
-    color: #5a4636;
-  }
-  .card.open .detail { max-height: 400px; margin-top: 14px; }
-
-  /* 名人名言 */
-  .quotes {
-    max-width: 880px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-  .quote {
-    padding: 30px 8px;
-    border-bottom: 1px dashed rgba(122,20,24,0.25);
-    text-align: center;
-  }
-  .quote:last-child { border-bottom: none; }
-  .quote .text {
-    font-size: clamp(20px, 3.2vw, 30px);
-    color: var(--crimson-deep);
-    letter-spacing: 2px;
-    line-height: 1.7;
-  }
-  .quote .from {
-    margin-top: 14px;
-    font-size: 14px;
-    color: var(--gold);
-    letter-spacing: 3px;
-  }
-
-  footer {
-    background: var(--ink);
-    color: var(--gold-soft);
-    text-align: center;
-    padding: 40px 8vw;
-    font-size: 13px;
-    letter-spacing: 3px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .reveal { opacity: 1; transform: none; transition: none; }
-    html { scroll-behavior: auto; }
-  }
+:root{--gold:#d9b56a;--gold-hi:#f2ddaa;--red:#b0382a;--paper:#ead9b6;--dim:#9a7f55;--faint:#6b573a}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#0b0705}
+body{color:var(--paper);font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body.pre{overflow:hidden}
+::selection{background:rgba(217,181,106,.3);color:#fff}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(217,181,106,.35);border-radius:2px}
+::-webkit-scrollbar-track{background:#0b0705}
+#spacer{width:1px}
+/* ============ 引导页 ============ */
+#gate{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(130% 100% at 50% 28%,#241208 0%,#150c06 52%,#090504 100%);transition:opacity 1.4s ease}
+#gate.off{opacity:0;pointer-events:none}
+#gate::after{content:"";position:absolute;inset:0;border:1px solid rgba(217,181,106,.12);margin:22px;pointer-events:none}
+#gate .seal{width:88px;height:88px;border:2.5px solid var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:46px;color:var(--red);transform:rotate(-8deg);box-shadow:0 0 60px rgba(176,56,42,.45),inset 0 0 18px rgba(176,56,42,.2);font-weight:900;opacity:0;animation:chin 1.2s .1s cubic-bezier(.2,.7,.2,1) forwards}
+#gate h1{font-size:min(16vw,118px);font-weight:900;margin:40px 0 6px;color:var(--gold-hi);text-shadow:0 0 50px rgba(242,221,170,.3)}
+#gate h1 span{display:inline-block;opacity:0;animation:chin 1.3s cubic-bezier(.2,.7,.2,1) forwards}
+#gate h1 span:nth-child(1){animation-delay:.35s}
+#gate h1 span:nth-child(2){animation-delay:.6s;text-indent:.1em}
+#gate .sub{letter-spacing:.75em;text-indent:.75em;color:var(--dim);font-size:15px;opacity:0;animation:chin 1.2s .95s cubic-bezier(.2,.7,.2,1) forwards}
+#gate .rule{width:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:34px 0;animation:rl 1.4s 1.15s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes rl{to{width:min(420px,70vw)}}
+#gate .hp{font-size:13.5px;color:var(--faint);letter-spacing:.28em;margin-bottom:36px;opacity:0;animation:chin 1.2s 1.3s ease forwards}
+#start{position:relative;font-family:inherit;background:none;border:none;color:var(--gold);font-size:19px;letter-spacing:.55em;text-indent:.55em;padding:20px 12px;cursor:pointer;opacity:0;animation:chin 1.2s 1.5s ease forwards;transition:color .4s,text-shadow .4s}
+#start::before,#start::after{content:"";position:absolute;left:50%;width:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transition:width .6s cubic-bezier(.2,.7,.2,1)}
+#start::before{top:0}
+#start::after{bottom:0}
+#start:hover{color:var(--gold-hi);text-shadow:0 0 24px rgba(242,221,170,.5)}
+#start:hover::before,#start:hover::after{width:240px;left:calc(50% - 120px)}
+#gate .tip{margin-top:32px;font-size:12px;color:#57452c;letter-spacing:.3em;opacity:0;animation:chin 1.2s 1.75s ease forwards}
+@keyframes chin{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:none}}
+/* ============ HUD ============ */
+#pbar{position:fixed;top:0;left:0;height:2px;width:0;z-index:36;background:linear-gradient(90deg,rgba(122,36,24,.9),var(--gold));box-shadow:0 0 12px rgba(217,181,106,.4)}
+#chap{position:fixed;top:28px;left:36px;z-index:35;font-size:13px;letter-spacing:.42em;color:var(--dim);display:flex;align-items:center;gap:14px}
+#chap b{color:var(--gold);font-weight:400;transition:opacity .5s}
+#chap i{display:block;width:34px;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
+#mute{position:fixed;top:22px;right:28px;z-index:40;font-family:inherit;font-size:12.5px;letter-spacing:.18em;color:var(--dim);background:rgba(14,9,6,.4);border:1px solid rgba(154,127,85,.3);padding:8px 16px;cursor:pointer;border-radius:20px;transition:all .35s;backdrop-filter:blur(6px)}
+#mute:hover{color:var(--gold);border-color:rgba(217,181,106,.5)}
+#ticks{position:fixed;right:30px;top:50%;transform:translateY(-50%);z-index:35;display:flex;flex-direction:column;gap:16px}
+#ticks .tk{display:flex;align-items:center;justify-content:flex-end;gap:9px;color:#54432b;font-size:11.5px;letter-spacing:.12em;opacity:.7;transition:all .5s}
+#ticks .tk i{width:5px;height:5px;border-radius:50%;background:#3d2f1c;display:block;transition:all .5s}
+#ticks .tk.on{color:var(--gold);opacity:1}
+#ticks .tk.on i{background:var(--gold);box-shadow:0 0 12px rgba(217,181,106,.9);transform:scale(1.35)}
+/* ============ 悬浮地图 ============ */
+#mapbtn{position:fixed;left:30px;bottom:30px;z-index:40;width:54px;height:54px;border-radius:50%;border:1px solid rgba(217,181,106,.45);background:rgba(14,9,6,.55);color:var(--gold);cursor:pointer;font-size:19px;display:flex;align-items:center;justify-content:center;transition:all .4s;backdrop-filter:blur(6px)}
+#mapbtn:hover{box-shadow:0 0 26px rgba(217,181,106,.35);border-color:var(--gold);transform:scale(1.06)}
+#mappanel{position:fixed;left:30px;bottom:98px;z-index:40;width:296px;background:rgba(13,8,5,.82);border:1px solid rgba(217,181,106,.25);border-radius:12px;padding:18px 16px 12px;opacity:0;pointer-events:none;transform:translateY(14px) scale(.97);transition:all .45s cubic-bezier(.2,.7,.2,1);backdrop-filter:blur(14px);box-shadow:0 24px 70px rgba(0,0,0,.6)}
+#mappanel.open{opacity:1;pointer-events:auto;transform:none}
+#mappanel h4{color:var(--gold);font-size:12.5px;letter-spacing:.34em;margin-bottom:8px;font-weight:400}
+#mappanel .now{font-size:12px;color:var(--dim);letter-spacing:.2em;margin-top:8px;border-top:1px solid rgba(217,181,106,.15);padding-top:9px}
+#mappanel .now b{color:var(--gold-hi);font-weight:400}
+#mappanel svg{width:100%;height:auto;display:block}
+/* ============ 舞台与场景 ============ */
+#stage{position:fixed;inset:0;overflow:hidden}
+.scene{position:absolute;inset:0;opacity:0;transform:scale(1.055);transition:transform 2s cubic-bezier(.2,.7,.2,1)}
+.scene.on{transform:scale(1)}
+.scene svg{position:absolute;inset:0;width:100%;height:100%;animation:kb 30s ease-in-out infinite alternate}
+@keyframes kb{from{transform:scale(1.015)}to{transform:scale(1.075)}}
+.scene:nth-child(2n) svg{animation-duration:36s;animation-direction:alternate-reverse}
+.wm{position:absolute;right:1vw;bottom:-9vh;font-size:64vh;line-height:1;font-weight:900;color:transparent;-webkit-text-stroke:1.5px rgba(217,181,106,.09);z-index:2;pointer-events:none;user-select:none}
+/* ============ 文案 ============ */
+.copy{position:absolute;z-index:6}
+.copy .rv{opacity:0;transform:translateY(38px);transition:opacity 1.15s cubic-bezier(.2,.7,.2,1),transform 1.15s cubic-bezier(.2,.7,.2,1)}
+.scene.on .copy .rv{opacity:1;transform:none}
+.copy .k{display:block;font-size:13.5px;letter-spacing:.5em;color:var(--dim);margin-bottom:16px;display:flex;align-items:center;gap:14px}
+.copy .k::before{content:"";width:40px;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
+.copy.fine{left:8vw;top:50%;transform:translateY(-52%);max-width:660px}
+.copy.fine h2{font-size:clamp(30px,3vw,44px);color:var(--gold-hi);letter-spacing:.2em;margin-bottom:22px;font-weight:700;text-shadow:0 0 40px rgba(242,221,170,.18)}
+.copy.fine p{font-size:clamp(19px,1.75vw,25px);line-height:2.15;color:#ecdfc2;text-shadow:0 2px 18px rgba(0,0,0,.9)}
+.copy.fine em{font-style:normal;color:var(--gold-hi);border-bottom:1px solid rgba(217,181,106,.35);padding-bottom:2px}
+.copy.bold{left:0;right:0;top:31vh;text-align:center}
+.copy.bold .k{justify-content:center}
+.copy.bold .k::after{content:"";width:40px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+.copy.bold .b{font-size:clamp(42px,6.6vw,84px);letter-spacing:.1em;color:var(--gold-hi);font-weight:900;text-shadow:0 0 60px rgba(242,221,170,.25),0 6px 28px rgba(0,0,0,.95);line-height:1.35}
+.copy.bold .s{display:block;margin-top:26px;font-size:clamp(14px,1.4vw,19px);color:var(--dim);letter-spacing:.45em;text-indent:.45em}
+.copy.bold .fin{margin-top:38px;font-size:clamp(17px,1.7vw,25px);color:#e2d1a8;letter-spacing:.24em;line-height:2.1}
+.copy.bold .fin b{color:var(--gold-hi);font-weight:400}
+/* ============ 幕间大字 ============ */
+#bigchar{position:fixed;left:50%;top:47%;transform:translate(-50%,-50%);font-size:46vh;font-weight:900;color:rgba(242,221,170,.08);z-index:8;pointer-events:none;opacity:0;text-shadow:0 0 80px rgba(217,181,106,.1)}
+#bigchar.go{animation:bc 1.8s ease forwards}
+@keyframes bc{0%{opacity:0;transform:translate(-50%,-50%) scale(1.32)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(.93)}}
+/* ============ 氛围层 ============ */
+.vignette{position:fixed;inset:0;z-index:20;pointer-events:none;background:radial-gradient(125% 125% at 50% 44%,transparent 52%,rgba(4,2,1,.62) 100%)}
+.vignette::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,2,1,.35),transparent 12%,transparent 88%,rgba(4,2,1,.4))}
+#grain{position:fixed;inset:0;z-index:21;pointer-events:none;opacity:.05}
+#hint{position:fixed;bottom:34px;left:50%;transform:translateX(-50%);z-index:30;color:#8a7248;font-size:12.5px;letter-spacing:.55em;text-indent:.55em;animation:flick 2.4s infinite;transition:opacity .9s}
+#hint.off{opacity:0}
+#hint::before,#hint::after{content:"";position:absolute;top:50%;width:50px;height:1px;background:linear-gradient(90deg,transparent,rgba(217,181,106,.4));margin-top:-.5px}
+#hint::before{left:-70px}
+#hint::after{right:-70px;transform:scaleX(-1)}
+/* ============ 场景动画 ============ */
+@keyframes march{from{transform:translateX(-170px)}to{transform:translateX(1370px)}}
+@keyframes marchL{from{transform:translateX(1370px)}to{transform:translateX(-170px)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes wave{from{transform:translateX(0)}to{transform:translateX(-140px)}}
+@keyframes fall{from{transform:translateY(-40px)}to{transform:translateY(720px)}}
+@keyframes flick{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes flame{0%,100%{opacity:.7}38%{opacity:.3}55%{opacity:.9}80%{opacity:.45}}
+@keyframes dashmove{to{stroke-dashoffset:-200}}
+@keyframes boat{0%,100%{transform:translate(520px,500px) rotate(-1.5deg)}50%{transform:translate(520px,491px) rotate(1.4deg)}}
+@keyframes breathe{0%,100%{opacity:.85}50%{opacity:1}}
+/* 可访问性（PRD §5）：系统开启"减少动态效果"时，收束动画到终态，内容照常可读 */
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
 </style>
 </head>
-<body>
-  <div id="progress"></div>
+<body class="pre">
 
-  <!-- 开场 -->
-  <header class="hero">
-    <div class="seal">红</div>
-    <h1>红军</h1>
-    <div class="sub">长 征 · 二 万 五 千 里</div>
-    <div class="scroll-hint">向下滚动，听一段故事 ↓</div>
-  </header>
+<!-- 人物剪影符号 -->
+<svg width="0" height="0" style="position:absolute"><defs>
+<g id="man"><circle cx="0" cy="-31" r="5.2"/><rect x="-4.6" y="-25" width="9.2" height="17" rx="3.2"/><rect x="-4.2" y="-8.5" width="3.6" height="11.5" rx="1.6"/><rect x="0.6" y="-8.5" width="3.6" height="11.5" rx="1.6"/></g>
+</defs></svg>
 
-  <!-- 叙事段 -->
-  <section class="chapter">
-    <div class="year reveal">1934</div>
-    <div class="tag reveal">序章 · 出发</div>
-    <h2 class="reveal">从瑞金启程</h2>
-    <p class="reveal">中央苏区第五次反"围剿"失利，八万余红军主力被迫离开家园，于秋日里踏上战略转移之路。他们不知道终点在哪，只知道脚下必须向前。</p>
-    <div class="pull reveal">"十月里来秋风凉，中央红军远征忙。"</div>
-  </section>
+<!-- 引导页 -->
+<div id="gate">
+  <div class="seal">征</div>
+  <h1><span>长</span><span>征</span></h1>
+  <div class="sub">一 九 三 四 —— 一 九 三 六</div>
+  <div class="rule"></div>
+  <div class="hp">建议佩戴耳机 · 灯光调暗 · 全屏体验</div>
+  <button id="start">开 始 体 验</button>
+  <div class="tip">进入后无需任何点击 · 纯滚动推进</div>
+</div>
 
-  <section class="chapter">
-    <div class="year reveal">1934</div>
-    <div class="tag reveal">血战 · 湘江</div>
-    <h2 class="reveal">湘江之痛</h2>
-    <p class="reveal">突破第四道封锁线，红军在湘江畔与数倍之敌血战。出发时的八万余人，渡江后仅余三万余。惨烈的代价，把一个生死攸关的转折推到了眼前。</p>
-    <div class="pull reveal">"三年不饮湘江水，十年不食湘江鱼。"</div>
-  </section>
+<!-- HUD -->
+<div id="pbar"></div>
+<div id="chap"><b id="chapN">序幕</b><i></i><span id="chapT">长征之前</span></div>
+<button id="mute">🔊 音乐：开</button>
+<div id="ticks"></div>
 
-  <section class="chapter">
-    <div class="year reveal">1935</div>
-    <div class="tag reveal">转折 · 遵义</div>
-    <h2 class="reveal">遵义会议</h2>
-    <p class="reveal">在最危急的关头，一次会议改变了队伍的航向。正确的军事指挥重新确立，这支队伍终于找回了自己的方向。</p>
-    <div class="pull reveal">"生死攸关的转折点。"</div>
-  </section>
+<div id="stage">
 
-  <section class="chapter">
-    <div class="year reveal">1935</div>
-    <div class="tag reveal">绝境 · 雪山草地</div>
-    <h2 class="reveal">翻雪山，过草地</h2>
-    <p class="reveal">夹金山的雪、松潘草地的泥，是没有硝烟的战场。缺衣少食，前有险路，后有追兵，支撑他们走下去的，是不肯低下的头。</p>
-    <div class="pull reveal">"风雨浸衣骨更硬，野菜充饥志越坚。"</div>
-  </section>
+<!-- 壹 · 围 -->
+<section class="scene" data-ch="壹" data-name="围" data-char="围">
+  <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="g1" cx="50%" cy="12%" r="90%">
+        <stop offset="0%" stop-color="#241b30"/><stop offset="55%" stop-color="#151019"/><stop offset="100%" stop-color="#0c0810"/>
+      </radialGradient>
+      <radialGradient id="g1f" cx="50%" cy="100%" r="80%">
+        <stop offset="0%" stop-color="rgba(150,140,180,.10)"/><stop offset="100%" stop-color="rgba(150,140,180,0)"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="675" fill="url(#g1)"/>
+    <rect y="330" width="1200" height="345" fill="url(#g1f)"/>
+    <rect y="540" width="1200" height="135" fill="#0c0810"/>
+    <g fill="#1e1722">
+      <rect x="80" y="470" width="90" height="80"/><rect x="122" y="430" width="58" height="120"/>
+      <rect x="500" y="484" width="70" height="66"/>
+      <rect x="900" y="452" width="104" height="98"/>
+    </g>
+    <polygon points="990,152 730,675 1230,675" fill="rgba(224,206,160,.09)">
+      <animateTransform attributeName="transform" type="rotate" values="-16 990 152;14 990 152;-16 990 152" dur="9s" repeatCount="indefinite"/>
+    </polygon>
+    <g fill="#0a070c">
+      <rect x="976" y="150" width="28" height="390"/><rect x="960" y="122" width="60" height="34"/><rect x="985" y="98" width="11" height="26"/>
+    </g>
+    <circle cx="990" cy="152" r="8" fill="rgba(230,217,168,.25)"/>
+    <circle cx="990" cy="152" r="6" fill="#e6d9a8" style="animation:flick 2.4s infinite"/>
+    <g stroke="#3a2f42" stroke-width="2.5" fill="none">
+      <polyline points="0,560 40,546 80,560 120,546 160,560 200,546 240,560 280,546 320,560 360,546 400,560 440,546 480,560 520,546 560,560 600,546 640,560 680,546 720,560 760,546 800,560 840,546 880,560 920,546 960,560 1000,546 1040,560 1080,546 1120,560 1160,546 1200,560"/>
+      <polyline points="0,598 40,586 80,598 120,586 160,598 200,586 240,598 280,586 320,598 360,586 400,598 440,586 480,598 520,586 560,598 600,586 640,598 680,586 720,598 760,586 800,598 840,586 880,598 920,586 960,598 1000,586 1040,598 1080,586 1120,598 1160,586 1200,598"/>
+    </g>
+    <g fill="#08050a">
+      <use href="#man" transform="translate(420,642) scale(1.15)"/>
+      <use href="#man" transform="translate(465,648) scale(1.1)"/>
+      <use href="#man" transform="translate(510,640) scale(1.2)"/>
+      <use href="#man" transform="translate(555,646) scale(1.05)"/>
+      <use href="#man" transform="translate(600,643) scale(1.15)"/>
+    </g>
+  </svg>
+  <div class="wm">围</div>
+  <div class="copy fine">
+    <span class="k rv" style="transition-delay:.1s">一九三四年 · 秋</span>
+    <h2 class="rv" style="transition-delay:.22s">堡垒，圈到了门口</h2>
+    <p class="rv" style="transition-delay:.38s">堡垒一步步向前修，苏区一寸寸向后让。广昌失守，兴国告急；粮食见了底，盐比银贵。有人卸下自家的门板送去扎担架——都明白：<em>留下来，是死；走出去，未必活。</em></p>
+  </div>
+</section>
 
-  <section class="chapter">
-    <div class="year reveal">1936</div>
-    <div class="tag reveal">会师 · 会宁</div>
-    <h2 class="reveal">三军会宁会师</h2>
-    <p class="reveal">红一、二、四方面军在甘肃会宁胜利会师，历时两年的长征落下帷幕。二万五千里，他们用脚底板走完了一部意志的史诗。</p>
-    <div class="pull reveal">"红军不怕远征难，万水千山只等闲。"</div>
-  </section>
+<!-- 贰 · 出发 -->
+<section class="scene" data-ch="贰" data-name="出发" data-char="别">
+  <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="g2" cx="78%" cy="14%" r="110%">
+        <stop offset="0%" stop-color="#151a30"/><stop offset="55%" stop-color="#0c0f1e"/><stop offset="100%" stop-color="#070812"/>
+      </radialGradient>
+      <radialGradient id="g2m" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(235,228,205,.28)"/><stop offset="100%" stop-color="rgba(235,228,205,0)"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="675" fill="url(#g2)"/>
+    <circle cx="180" cy="90" r="1.6" fill="#cfd6ff" style="animation:flick 3s infinite"/>
+    <circle cx="320" cy="60" r="1.3" fill="#cfd6ff" style="animation:flick 2.2s infinite .5s"/>
+    <circle cx="520" cy="110" r="1.8" fill="#cfd6ff" style="animation:flick 2.8s infinite 1s"/>
+    <circle cx="760" cy="70" r="1.4" fill="#cfd6ff" style="animation:flick 3.4s infinite .3s"/>
+    <circle cx="1060" cy="100" r="1.6" fill="#cfd6ff" style="animation:flick 2.6s infinite .8s"/>
+    <circle cx="920" cy="120" r="110" fill="url(#g2m)"/>
+    <circle cx="920" cy="120" r="46" fill="#e8e2c8"/>
+    <path d="M0,430 L200,360 L420,420 L640,370 L860,430 L1080,380 L1200,420 L1200,470 L0,470 Z" fill="#0a0d18"/>
+    <rect y="470" width="1200" height="205" fill="#101830"/>
+    <polygon points="880,470 940,675 1010,675 960,470" fill="rgba(232,226,200,.10)"/>
+    <g stroke="#22314f" stroke-width="3" fill="none">
+      <path d="M140,520 q30,-8 60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0" style="animation:wave 6s linear infinite"/>
+      <path d="M0,585 q30,-8 60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0" style="animation:wave 8s linear infinite"/>
+    </g>
+    <g fill="#131022">
+      <rect x="300" y="516" width="52" height="10" rx="2"/><rect x="368" y="522" width="52" height="10" rx="2"/><rect x="436" y="516" width="52" height="10" rx="2"/><rect x="504" y="522" width="52" height="10" rx="2"/><rect x="572" y="516" width="52" height="10" rx="2"/><rect x="640" y="522" width="52" height="10" rx="2"/><rect x="708" y="516" width="52" height="10" rx="2"/><rect x="776" y="522" width="52" height="10" rx="2"/><rect x="844" y="516" width="52" height="10" rx="2"/>
+    </g>
+    <g style="animation:march 30s linear infinite">
+      <g fill="#05070f">
+        <g style="animation:bob 1.1s ease-in-out infinite"><use href="#man" transform="translate(360,548) scale(1.25)"/><rect x="352" y="512" width="34" height="7" rx="3"/></g>
+        <g style="animation:bob 1.15s ease-in-out infinite -.3s"><use href="#man" transform="translate(430,552) scale(1.2)"/></g>
+        <g style="animation:bob 1.05s ease-in-out infinite -.6s"><use href="#man" transform="translate(500,547) scale(1.3)"/><rect x="492" y="509" width="36" height="8" rx="3"/></g>
+        <g style="animation:bob 1.2s ease-in-out infinite -.15s"><use href="#man" transform="translate(570,551) scale(1.2)"/></g>
+        <g style="animation:bob 1.1s ease-in-out infinite -.5s"><use href="#man" transform="translate(640,549) scale(1.25)"/></g>
+        <g style="animation:bob 1.15s ease-in-out infinite -.8s"><use href="#man" transform="translate(710,552) scale(1.18)"/></g>
+        <g style="animation:bob 1.08s ease-in-out infinite -.25s"><use href="#man" transform="translate(780,548) scale(1.28)"/><rect x="772" y="510" width="34" height="7" rx="3"/></g>
+      </g>
+    </g>
+    <g fill="#05070f">
+      <use href="#man" transform="translate(120,556) scale(1.2)"/>
+      <use href="#man" transform="translate(170,560) scale(1.15)"/>
+      <use href="#man" transform="translate(220,556) scale(1.22)"/>
+    </g>
+    <g stroke="#5a3a18" stroke-width="3"><line x1="222" y1="500" x2="222" y2="522"/></g>
+    <circle cx="222" cy="497" r="8" fill="rgba(232,162,74,.3)"/>
+    <circle cx="222" cy="497" r="5" fill="#e8a24a" style="animation:flick 1.1s infinite"/>
+    <circle cx="122" cy="505" r="4" fill="#e8a24a" style="animation:flick 1.4s infinite .4s"/>
+  </svg>
+  <div class="wm">别</div>
+  <div class="copy bold">
+    <span class="k rv" style="transition-delay:.1s">一九三四年十月十七日夜 · 于都河</span>
+    <p class="b rv" style="transition-delay:.24s">八万六千人，一夜过河。</p>
+    <span class="s rv" style="transition-delay:.42s">门板卸了 · 摆渡的船 · 没有回去的路</span>
+  </div>
+</section>
 
-  <!-- 转场：醒来 -->
-  <section class="awaken">
-    <div class="line1 reveal">二万五千里，他们走完了。</div>
-    <div class="divider"></div>
-    <div class="line2 reveal">而我们，正走在他们换来的今天里。</div>
-  </section>
+<!-- 叁 · 湘江 -->
+<section class="scene" data-ch="叁" data-name="湘江" data-char="血">
+  <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="g3" cx="50%" cy="0%" r="120%">
+        <stop offset="0%" stop-color="#200e0c"/><stop offset="55%" stop-color="#1c0d0d"/><stop offset="100%" stop-color="#120707"/>
+      </radialGradient>
+      <radialGradient id="g3f" cx="50%" cy="62%" r="55%">
+        <stop offset="0%" stop-color="rgba(224,88,44,.30)"/><stop offset="100%" stop-color="rgba(224,88,44,0)"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="675" fill="url(#g3)"/>
+    <rect y="380" width="1200" height="90" fill="#3a1410"/>
+    <ellipse cx="600" cy="455" rx="520" ry="120" fill="url(#g3f)" style="animation:flame 3.6s infinite"/>
+    <rect y="460" width="1200" height="215" fill="#4a1512"/>
+    <g stroke="#6b2018" stroke-width="3" fill="none">
+      <path d="M100,530 q30,-7 60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0" style="animation:wave 5.5s linear infinite"/>
+      <path d="M300,610 q30,-7 60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0" style="animation:wave 7s linear infinite"/>
+    </g>
+    <circle cx="700" cy="470" r="12" fill="rgba(255,210,122,.18)"/>
+    <circle cx="700" cy="470" r="6" fill="#ffd27a" style="animation:flick 1.7s infinite"/>
+    <circle cx="380" cy="452" r="5" fill="#ffd27a" style="animation:flick 2.3s infinite .6s"/>
+    <polygon points="700,470 620,675 790,675" fill="rgba(255,210,122,.05)"/>
+    <g fill="#0c0505">
+      <g style="animation:bob 1.3s ease-in-out infinite"><use href="#man" transform="translate(330,600) scale(1.25)"/></g>
+      <g style="animation:bob 1.4s ease-in-out infinite -.4s"><use href="#man" transform="translate(420,612) scale(1.2)"/><rect x="404" y="576" width="40" height="8" rx="3"/></g>
+      <g style="animation:bob 1.25s ease-in-out infinite -.7s"><use href="#man" transform="translate(520,596) scale(1.3)"/></g>
+      <g style="animation:bob 1.35s ease-in-out infinite -.2s"><use href="#man" transform="translate(640,614) scale(1.22)"/></g>
+      <g style="animation:bob 1.45s ease-in-out infinite -.55s"><use href="#man" transform="translate(760,602) scale(1.26)"/><rect x="744" y="566" width="40" height="8" rx="3"/></g>
+      <use href="#man" transform="translate(880,632) rotate(78) scale(1.1)"/>
+      <use href="#man" transform="translate(960,648) rotate(95) scale(1.05)"/>
+      <use href="#man" transform="translate(240,644) rotate(85) scale(1)"/>
+    </g>
+  </svg>
+  <div class="wm">血</div>
+  <div class="copy fine">
+    <span class="k rv" style="transition-delay:.1s">一九三四年十二月初 · 湘江</span>
+    <h2 class="rv" style="transition-delay:.22s">江水，是红的</h2>
+    <p class="rv" style="transition-delay:.38s">为中央纵队多抬一台机器，就多慢一步；多慢一步，就多倒下一些人。五天五夜，八万人只剩三万。师长陈树湘负伤被俘，绞断了自己的肠子——那年他二十九岁。<em>湘江之后，再没有人怀疑：老路，走不通了。</em></p>
+  </div>
+</section>
 
-  <!-- 浏览态：正常状态 -->
-  <main class="browse">
-    <div class="section-head">
-      <div class="kicker">英 雄 故 事</div>
-      <h3>记住这些名字</h3>
-      <div class="rule"></div>
-    </div>
+<!-- 肆 · 遵义 -->
+<section class="scene" data-ch="肆" data-name="遵义" data-char="灯">
+  <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="g4" cx="50%" cy="42%" r="85%">
+        <stop offset="0%" stop-color="#2c1c10"/><stop offset="55%" stop-color="#1d1410"/><stop offset="100%" stop-color="#100a07"/>
+      </radialGradient>
+      <radialGradient id="g4l" cx="50%" cy="27%" r="45%">
+        <stop offset="0%" stop-color="rgba(242,194,106,.20)"/><stop offset="100%" stop-color="rgba(242,194,106,0)"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="675" fill="url(#g4)"/>
+    <rect width="1200" height="675" fill="url(#g4l)" style="animation:breathe 6s ease-in-out infinite"/>
+    <rect x="440" y="170" width="320" height="320" fill="#0f0a08" stroke="#0a0605" stroke-width="8"/>
+    <rect x="452" y="182" width="296" height="296" fill="rgba(232,180,90,.15)" style="animation:flick 5s infinite"/>
+    <rect x="596" y="182" width="10" height="296" fill="#0a0605"/>
+    <rect x="452" y="322" width="296" height="10" fill="#0a0605"/>
+    <g>
+      <line x1="600" y1="0" x2="600" y2="118" stroke="#0b0705" stroke-width="4"/>
+      <g>
+        <animateTransform attributeName="transform" type="rotate" values="-3 600 118;3 600 118;-3 600 118" dur="4.5s" repeatCount="indefinite"/>
+        <line x1="600" y1="118" x2="600" y2="168" stroke="#0b0705" stroke-width="3"/>
+        <circle cx="600" cy="184" r="34" fill="rgba(242,194,106,.22)"/>
+        <path d="M584,168 L616,168 L608,192 L592,192 Z" fill="#181008"/>
+        <circle cx="600" cy="184" r="9" fill="#f2c26a" style="animation:flick 2.6s infinite"/>
+      </g>
+    </g>
+    <rect x="450" y="446" width="300" height="16" fill="#0b0705"/>
+    <rect x="466" y="462" width="14" height="120" fill="#0b0705"/>
+    <rect x="720" y="462" width="14" height="120" fill="#0b0705"/>
+    <g fill="#080503">
+      <use href="#man" transform="translate(500,462) scale(1.3)"/>
+      <use href="#man" transform="translate(566,458) scale(1.24)"/>
+      <use href="#man" transform="translate(638,462) scale(1.3)"/>
+      <use href="#man" transform="translate(704,458) scale(1.24)"/>
+    </g>
+    <circle cx="300" cy="240" r="2" fill="rgba(232,200,119,.3)" style="animation:fall 14s linear infinite"/>
+    <circle cx="880" cy="200" r="2.4" fill="rgba(232,200,119,.25)" style="animation:fall 17s linear infinite -6s"/>
+    <circle cx="1000" cy="330" r="1.8" fill="rgba(232,200,119,.3)" style="animation:fall 12s linear infinite -3s"/>
+  </svg>
+  <div class="wm">灯</div>
+  <div class="copy bold">
+    <span class="k rv" style="transition-delay:.1s">一九三五年一月 · 遵义会议</span>
+    <p class="b rv" style="transition-delay:.24s">往哪儿走，比走多快重要。</p>
+    <span class="s rv" style="transition-delay:.42s">一盏灯 · 一张桌 · 一次彻底的清算</span>
+  </div>
+</section>
 
-    <div class="heroes" id="heroes"></div>
+<!-- 伍 · 赤水 -->
+<section class="scene" data-ch="伍" data-name="赤水" data-char="变">
+  <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="g5" cx="50%" cy="0%" r="115%">
+        <stop offset="0%" stop-color="#1a212e"/><stop offset="55%" stop-color="#131820"/><stop offset="100%" stop-color="#0b0f16"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="675" fill="url(#g5)"/>
+    <rect y="400" width="1200" height="275" fill="#17263a"/>
+    <g stroke="rgba(217,181,106,.45)" stroke-width="2.5" fill="none" stroke-dasharray="12 12" style="animation:dashmove 5s linear infinite">
+      <path d="M180,470 C340,430 300,520 480,500 C660,480 560,560 780,520 C960,490 900,440 1050,470"/>
+    </g>
+    <g stroke="rgba(217,181,106,.15)" stroke-width="2" fill="none" stroke-dasharray="6 10">
+      <path d="M240,300 C400,250 520,330 700,270 C860,220 940,300 1040,260"/>
+    </g>
+    <g stroke="#22314f" stroke-width="3" fill="none">
+      <path d="M200,580 q30,-7 60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0" style="animation:wave 6s linear infinite"/>
+    </g>
+    <g fill="#0a0d12" style="animation:march 24s linear infinite">
+      <g style="animation:bob 1.15s ease-in-out infinite"><use href="#man" transform="translate(320,548) scale(1.2)"/></g>
+      <g style="animation:bob 1.1s ease-in-out infinite -.4s"><use href="#man" transform="translate(380,552) scale(1.15)"/><rect x="366" y="518" width="32" height="7" rx="3"/></g>
+      <g style="animation:bob 1.2s ease-in-out infinite -.2s"><use href="#man" transform="translate(440,549) scale(1.22)"/></g>
+    </g>
+    <g fill="#0a0d12" style="animation:marchL 27s linear infinite">
+      <g style="animation:bob 1.18s ease-in-out infinite -.5s"><use href="#man" transform="translate(760,460) scale(1.18)"/></g>
+      <g style="animation:bob 1.1s ease-in-out infinite -.1s"><use href="#man" transform="translate(700,464) scale(1.14)"/></g>
+      <g style="animation:bob 1.22s ease-in-out infinite -.7s"><use href="#man" transform="translate(640,461) scale(1.2)"/><rect x="626" y="430" width="32" height="7" rx="3"/></g>
+    </g>
+  </svg>
+  <div class="wm">变</div>
+  <div class="copy fine">
+    <span class="k rv" style="transition-delay:.1s">一九三五年一月至三月 · 赤水河</span>
+    <h2 class="rv" style="transition-delay:.22s">同一条河，走了四回</h2>
+    <p class="rv" style="transition-delay:.38s">敌人往东，我们向西；敌人回头，我们再回头。地图上绕出一个个圈，把几十万追兵绕得晕头转向。<em>四渡赤水，靠的不是运气——是把"走"本身，走成了武器。</em></p>
+  </div>
+</section>
 
-    <div class="section-head" style="margin-top:40px;">
-      <div class="kicker">名 人 名 言</div>
-      <h3>他们说过</h3>
-      <div class="rule"></div>
-    </div>
+<!-- 陆 · 金沙 -->
+<section class="scene" data-ch="陆" data-name="金沙" data-char="跃">
+  <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="g6" cx="50%" cy="8%" r="110%">
+        <stop offset="0%" stop-color="#141c2e"/><stop offset="55%" stop-color="#0e1420"/><stop offset="100%" stop-color="#080b12"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="675" fill="url(#g6)"/>
+    <polygon points="560,470 500,675 700,675 640,470" fill="rgba(225,220,195,.10)"/>
+    <polygon points="0,0 0,675 330,675 200,320 100,180" fill="#070a10"/>
+    <polygon points="1200,0 1200,675 850,675 990,300 1080,170" fill="#060810"/>
+    <rect y="470" width="1200" height="205" fill="#14243a"/>
+    <g stroke="#1f3350" stroke-width="3" fill="none">
+      <path d="M380,540 q30,-8 60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0" style="animation:wave 5s linear infinite"/>
+      <path d="M600,620 q30,-8 60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0 t60,0" style="animation:wave 6.5s linear infinite"/>
+    </g>
+    <g style="animation:boat 4.5s ease-in-out infinite">
+      <path d="M460,520 Q520,546 580,520 L568,510 L472,510 Z" fill="#0b0705"/>
+      <g fill="#050403">
+        <use href="#man" transform="translate(496,512) scale(1.05)"/>
+        <use href="#man" transform="translate(520,510) scale(1.05)"/>
+        <use href="#man" transform="translate(544,512) scale(1.05)"/>
+      </g>
+      <line x1="574" y1="512" x2="586" y2="486" stroke="#0b0705" stroke-width="3"/>
+    </g>
+  </svg>
+  <div class="wm">跃</div>
+  <div class="copy bold">
+    <span class="k rv" style="transition-delay:.1s">一九三五年五月 · 金沙江皎平渡</span>
+    <p class="b rv" style="transition-delay:.24s">七只小船，渡了一支军队。</p>
+    <span class="s rv" style="transition-delay:.42s">七天七夜 · 几万人的方面军 · 一人未失</span>
+  </div>
+</section>
 
-    <div class="quotes" id="quotes"></div>
-  </main>
+<!-- 柒 · 泸定 -->
+<section class="scene" data-ch="柒" data-name="泸定" data-char="索">
+  <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="g7" cx="50%" cy="0%" r="120%">
+        <stop offset="0%" stop-color="#1a1714"/><stop offset="55%" stop-color="#12100e"/><stop offset="100%" stop-color="#0a0908"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="675" fill="url(#g7)"/>
+    <polygon points="0,0 0,540 170,320 300,540" fill="#0a0908"/>
+    <polygon points="1200,0 1200,560 1040,330 900,560" fill="#090807"/>
+    <rect y="640" width="1200" height="35" fill="#0d141c"/>
+    <g stroke="#4a4238" fill="none">
+      <path d="M140,320 Q600,392 1060,308" stroke-width="3.2" style="animation:bob 5s ease-in-out infinite"/>
+      <path d="M140,336 Q600,404 1060,324" stroke-width="3" style="animation:bob 5s ease-in-out infinite -.6s"/>
+      <path d="M140,352 Q600,416 1060,340" stroke-width="2.8" style="animation:bob 5s ease-in-out infinite -1.1s"/>
+      <path d="M140,368 Q600,428 1060,356" stroke-width="2.6" style="animation:bob 5s ease-in-out infinite -1.7s"/>
+      <path d="M140,384 Q600,440 1060,372" stroke-width="2.4" style="animation:bob 5s ease-in-out infinite -2.3s"/>
+    </g>
+    <g fill="#26201a">
+      <rect x="330" y="392" width="34" height="7" rx="1"/>
+      <rect x="420" y="402" width="34" height="7" rx="1"/>
+      <rect x="820" y="398" width="34" height="7" rx="1"/>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="250,352;860,330" dur="16s" repeatCount="indefinite"/>
+      <use href="#man" transform="rotate(-8) scale(1.15)" fill="#0a0806"/>
+    </g>
+    <circle cx="1052" cy="330" r="11" fill="rgba(255,157,92,.2)"/>
+    <circle cx="1052" cy="330" r="5" fill="#ff9d5c" style="animation:flick 1.3s infinite"/>
+    <circle cx="1030" cy="356" r="4" fill="#ffd27a" style="animation:flick 1.9s infinite .5s"/>
+  </svg>
+  <div class="wm">索</div>
+  <div class="copy fine">
+    <span class="k rv" style="transition-delay:.1s">一九三五年五月廿九 · 大渡河泸定桥</span>
+    <h2 class="rv" style="transition-delay:.22s">十三根铁索</h2>
+    <p class="rv" style="transition-delay:.38s">桥板被拆，只剩十三根寒光凛凛的铁索。对岸枪口喷火，脚下是几十丈激流。二十二个人攀着铁索向前爬，身后的战友把木板一块块铺回来。<em>桥是铁的；过去的那批人，是钢的。</em></p>
+  </div>
+</section>
 
-  <footer>
-    谨以此页，纪念中国工农红军长征胜利 · 历史不容忘却
-  </footer>
+<!-- 捌 · 雪山 -->
+<section class="scene" data-ch="捌" data-name="雪山" data-char="雪">
+  <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="g8" cx="50%" cy="0%" r="115%">
+        <stop offset="0%" stop-color="#242c42"/><stop offset="55%" stop-color="#1a1e2a"/><stop offset="100%" stop-color="#0d0f16"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="675" fill="url(#g8)"/>
+    <polygon points="0,675 260,300 420,520 560,360 760,675" fill="#232939"/>
+    <polygon points="480,675 700,280 900,500 1040,340 1200,675" fill="#171b28"/>
+    <polygon points="220,340 260,300 300,344 280,352 244,350" fill="#b9c2d4" opacity=".85"/>
+    <polygon points="664,318 700,280 740,322 716,330 684,328" fill="#b9c2d4" opacity=".85"/>
+    <polygon points="1008,376 1040,340 1074,380 1050,386 1024,384" fill="#b9c2d4" opacity=".8"/>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0;0,675" dur="9s" repeatCount="indefinite"/>
+      <g fill="rgba(223,230,242,.85)">
+        <circle cx="80" cy="20" r="3"/><circle cx="200" cy="120" r="2.2"/><circle cx="340" cy="40" r="3.4"/><circle cx="460" cy="160" r="2.4"/><circle cx="580" cy="70" r="3"/><circle cx="700" cy="180" r="2"/><circle cx="820" cy="50" r="3.2"/><circle cx="940" cy="140" r="2.4"/><circle cx="1080" cy="30" r="3"/><circle cx="1140" cy="200" r="2.2"/><circle cx="150" cy="260" r="2.6"/><circle cx="520" cy="300" r="2"/><circle cx="900" cy="280" r="2.8"/><circle cx="660" cy="360" r="2.2"/><circle cx="300" cy="420" r="2.6"/>
+      </g>
+    </g>
+    <g stroke="rgba(255,255,255,.08)" stroke-width="2" fill="none" style="animation:wave 4s linear infinite">
+      <path d="M100,220 q60,-6 120,0 t120,0 t120,0 t120,0 t120,0 t120,0 t120,0"/>
+    </g>
+    <path d="M330,640 L760,372" stroke="rgba(217,181,106,.25)" stroke-width="2" stroke-dasharray="6 8" fill="none"/>
+    <g fill="#0c0e14">
+      <use href="#man" transform="translate(340,632) scale(1.05)"/>
+      <use href="#man" transform="translate(420,584) scale(1.02)"/>
+      <use href="#man" transform="translate(502,536) scale(1)"/>
+      <use href="#man" transform="translate(584,488) scale(.98)"/>
+      <use href="#man" transform="translate(666,440) scale(.96)"/>
+      <use href="#man" transform="translate(744,394) scale(.94)"/>
+    </g>
+  </svg>
+  <div class="wm">雪</div>
+  <div class="copy bold">
+    <span class="k rv" style="transition-delay:.1s">一九三五年六月 · 夹金山</span>
+    <p class="b rv" style="transition-delay:.24s">最冷的地方，站着一群最热的人。</p>
+    <span class="s rv" style="transition-delay:.42s">单衣 · 草鞋 · 四千多米的垭口</span>
+  </div>
+</section>
+
+<!-- 玖 · 草地 -->
+<section class="scene" data-ch="玖" data-name="草地" data-char="泽">
+  <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="g9" cx="50%" cy="0%" r="115%">
+        <stop offset="0%" stop-color="#1a2018"/><stop offset="55%" stop-color="#141a12"/><stop offset="100%" stop-color="#0b0e0a"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="675" fill="url(#g9)"/>
+    <rect y="420" width="1200" height="255" fill="#0f150d"/>
+    <g fill="#0d130c">
+      <ellipse cx="300" cy="560" rx="130" ry="26"/>
+      <ellipse cx="700" cy="620" rx="180" ry="30"/>
+      <ellipse cx="1010" cy="560" rx="120" ry="24"/>
+    </g>
+    <ellipse cx="300" cy="556" rx="90" ry="12" fill="rgba(140,170,140,.10)"/>
+    <ellipse cx="700" cy="616" rx="130" ry="14" fill="rgba(140,170,140,.10)"/>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0;0,675" dur="1.3s" repeatCount="indefinite"/>
+      <g stroke="rgba(190,205,215,.26)" stroke-width="1.6">
+        <line x1="60" y1="0" x2="52" y2="30"/><line x1="200" y1="60" x2="192" y2="90"/><line x1="360" y1="20" x2="352" y2="50"/><line x1="520" y1="90" x2="512" y2="120"/><line x1="680" y1="10" x2="672" y2="40"/><line x1="840" y1="70" x2="832" y2="100"/><line x1="1000" y1="30" x2="992" y2="60"/><line x1="1140" y1="100" x2="1132" y2="130"/>
+        <line x1="120" y1="300" x2="112" y2="330"/><line x1="300" y1="360" x2="292" y2="390"/><line x1="470" y1="300" x2="462" y2="330"/><line x1="640" y1="380" x2="632" y2="410"/><line x1="810" y1="310" x2="802" y2="340"/><line x1="980" y1="370" x2="972" y2="400"/><line x1="1120" y1="300" x2="1112" y2="330"/>
+      </g>
+    </g>
+    <g fill="#070a06" style="animation:march 26s linear infinite">
+      <g style="animation:bob 1.25s ease-in-out infinite"><use href="#man" transform="translate(300,600) scale(1.18)"/><rect x="286" y="566" width="34" height="7" rx="3"/></g>
+      <g style="animation:bob 1.3s ease-in-out infinite -.4s"><use href="#man" transform="translate(370,606) scale(1.14)"/></g>
+      <g style="animation:bob 1.22s ease-in-out infinite -.7s"><use href="#man" transform="translate(440,602) scale(1.2)"/></g>
+      <g style="animation:bob 1.34s ease-in-out infinite -.2s"><use href="#man" transform="translate(510,608) scale(1.12)"/><rect x="496" y="574" width="34" height="7" rx="3"/></g>
+    </g>
+    <g fill="#070a06">
+      <use href="#man" transform="translate(920,606) scale(1.1) rotate(14)"/>
+      <use href="#man" transform="translate(962,610) scale(1.08) rotate(-14)"/>
+    </g>
+  </svg>
+  <div class="wm">泽</div>
+  <div class="copy fine">
+    <span class="k rv" style="transition-delay:.1s">一九三五年八月 · 松潘草地</span>
+    <h2 class="rv" style="transition-delay:.22s">没有路的地方</h2>
+    <p class="rv" style="transition-delay:.38s">没有路，没有树，没有鸟。草甸下面是泥潭，踩错一步就再也上不来。粮食吃完了煮皮带，篝火点着了又灭。夜里有人背靠背坐下，就再没有醒来。<em>草地吞下了很多人，却没能吞下这支队伍。</em></p>
+  </div>
+</section>
+
+<!-- 拾 · 会师 -->
+<section class="scene" data-ch="拾" data-name="会师" data-char="会">
+  <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="g10" cx="50%" cy="66%" r="85%">
+        <stop offset="0%" stop-color="#4a2a14"/><stop offset="45%" stop-color="#2a1a10"/><stop offset="100%" stop-color="#140b07"/>
+      </radialGradient>
+      <radialGradient id="g10s" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(250,200,120,.5)"/><stop offset="55%" stop-color="rgba(250,200,120,.16)"/><stop offset="100%" stop-color="rgba(250,200,120,0)"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="675" fill="url(#g10)"/>
+    <g>
+      <animateTransform attributeName="transform" type="rotate" values="0 600 430;360 600 430" dur="60s" repeatCount="indefinite"/>
+      <g fill="rgba(242,180,90,.07)">
+        <polygon points="600,430 480,60 720,60"/>
+        <polygon points="600,430 1060,180 1120,340"/>
+        <polygon points="600,430 80,180 20,340"/>
+      </g>
+    </g>
+    <circle cx="600" cy="430" r="210" fill="url(#g10s)"/>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,50;0,-6" dur="8s" repeatCount="indefinite"/>
+      <circle cx="600" cy="430" r="72" fill="#f2b45a"/>
+    </g>
+    <rect y="560" width="1200" height="115" fill="#170c06"/>
+    <g fill="#0d0704" style="animation:march 20s linear infinite">
+      <g style="animation:bob 1.2s ease-in-out infinite"><use href="#man" transform="translate(300,610) scale(1.25)"/></g>
+      <g style="animation:bob 1.25s ease-in-out infinite -.4s"><use href="#man" transform="translate(370,614) scale(1.2)"/></g>
+      <g style="animation:bob 1.18s ease-in-out infinite -.7s"><use href="#man" transform="translate(440,611) scale(1.26)"/><rect x="424" y="576" width="36" height="8" rx="3"/></g>
+    </g>
+    <g fill="#0d0704" style="animation:marchL 22s linear infinite">
+      <g style="animation:bob 1.22s ease-in-out infinite -.3s"><use href="#man" transform="translate(880,612) scale(1.22)"/></g>
+      <g style="animation:bob 1.28s ease-in-out infinite -.6s"><use href="#man" transform="translate(810,616) scale(1.18)"/></g>
+      <g style="animation:bob 1.2s ease-in-out infinite -.1s"><use href="#man" transform="translate(740,613) scale(1.24)"/><rect x="724" y="578" width="36" height="8" rx="3"/></g>
+    </g>
+    <g transform="translate(600,470)">
+      <line x1="0" y1="0" x2="0" y2="-150" stroke="#0d0704" stroke-width="5"/>
+      <path d="M0,-150 L92,-132 L0,-112 Z" fill="#c23a28">
+        <animateTransform attributeName="transform" type="rotate" values="-5 0 -128;6 0 -128;-5 0 -128" dur="2.6s" repeatCount="indefinite"/>
+      </path>
+    </g>
+  </svg>
+  <div class="wm">会</div>
+  <div class="copy bold">
+    <span class="k rv" style="transition-delay:.1s">一九三六年十月 · 会宁 · 将台堡</span>
+    <p class="b rv" style="transition-delay:.24s">二万五千里，走完了。</p>
+    <span class="s rv" style="transition-delay:.42s">宣言书 · 宣传队 · 播种机</span>
+    <div class="fin rv" style="transition-delay:.6s">他们把最远的一条路，走成了最近的一条路——<br>而<b>我们</b>，正走在他们换来的今天里。</div>
+  </div>
+</section>
+
+</div>
+
+<div id="spacer"></div>
+
+<!-- 幕间大字 -->
+<div id="bigchar"></div>
+
+<div id="hint">向 下 滚 动 · 故 事 继 续</div>
+
+<div class="vignette"></div>
+<!-- 史实标注（PRD §5：涉及具体史实处标注「待核实」） -->
+<div style="position:fixed;right:14px;bottom:10px;z-index:6;font-size:11px;letter-spacing:.12em;color:rgba(217,181,106,.45);font-family:'Noto Serif SC',serif;pointer-events:none">※ 史实细节为常见表述整理 · 正式版逐条核实来源</div>
+<svg id="grain" width="100%" height="100%">
+  <filter id="nz"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+  <rect width="100%" height="100%" filter="url(#nz)"/>
+</svg>
+
+<!-- 悬浮地图（点击弹出） -->
+<button id="mapbtn" title="行军地图">🗺</button>
+<div id="mappanel">
+  <h4>红 一 方 面 军 行 军 路 线</h4>
+  <svg viewBox="0 0 300 430">
+    <path id="mappath" d="M52,392 C110,370 70,330 108,300 C150,268 96,246 128,214 C160,184 130,158 176,132 C216,110 186,88 232,66 C258,54 244,40 262,34" stroke="rgba(217,181,106,.22)" stroke-width="2.5" fill="none"/>
+    <path id="mappathOn" d="M52,392 C110,370 70,330 108,300 C150,268 96,246 128,214 C160,184 130,158 176,132 C216,110 186,88 232,66 C258,54 244,40 262,34" stroke="#d9b56a" stroke-width="2.5" fill="none"/>
+    <g id="mapnodes"></g>
+  </svg>
+  <div class="now">当前位置 · <b id="mapNow">瑞金</b></div>
+</div>
 
 <script>
-  // 英雄故事数据
-  const heroes = [
-    { name: "朱德", role: "红军总司令", brief: "与士兵同甘共苦，被赞'度量如大海，意志如钢铁'。",
-      detail: "朱德参与领导南昌起义，后率部上井冈山与毛泽东会师。长征中任红军总司令，始终与官兵同吃同住、共度艰险，以沉稳宽厚的品格凝聚军心。" },
-    { name: "方志敏", role: "闽浙赣根据地创建者", brief: "《可爱的中国》作者，坚贞不屈。",
-      detail: "方志敏是赣东北革命根据地和红十军的创建人之一。1935 年被俘后，在狱中写下《可爱的中国》《清贫》等不朽篇章，同年英勇就义，留下'敌人只能砍下我们的头颅，决不能动摇我们的信仰'的誓言。" },
-    { name: "彭德怀", role: "红三军团军团长", brief: "长征中以骁勇善战著称。",
-      detail: "彭德怀指挥红三军团担任前锋与殿后，强渡乌江、攻克娄山关、力克腊子口等硬仗中屡建奇功，是长征路上最锋利的一把刀。" },
-    { name: "徐海东", role: "红二十五军军长", brief: "人称'徐老虎'，为北上打开通道。",
-      detail: "徐海东率领的红二十五军率先到达陕北，并牵制敌军、接应中央红军北上，被毛泽东称为'对中国革命有大功的人'。" },
-    { name: "陈树湘", role: "红三十四师师长", brief: "湘江血战后断肠明志。",
-      detail: "湘江战役中，红三十四师担负全军后卫，师长陈树湘重伤被俘后毅然绞肠自尽，以二十九岁的生命诠释了'为苏维埃流尽最后一滴血'。" },
-    { name: "贺龙", role: "红二方面军总指挥", brief: "两把菜刀起家闹革命。",
-      detail: "贺龙是红二、六军团（后红二方面军）的主要创建者和领导者，长征中率部转战湘鄂川黔，有力策应了中央红军的战略转移。" }
-  ];
+(function(){
+  var scenes=[].slice.call(document.querySelectorAll('.scene'));
+  var N=scenes.length;
+  document.getElementById('spacer').style.height=(N*170+50)+'vh';
+  var big=document.getElementById('bigchar'),last=-1;
 
-  // 名人名言数据
-  const quotes = [
-    { text: "红军不怕远征难，万水千山只等闲。", from: "—— 毛泽东《七律·长征》" },
-    { text: "星星之火，可以燎原。", from: "—— 毛泽东" },
-    { text: "敌人只能砍下我们的头颅，决不能动摇我们的信仰！", from: "—— 方志敏" },
-    { text: "我们中华民族有同自己的敌人血战到底的气概，有在自力更生的基础上光复旧物的决心，有自立于世界民族之林的能力。", from: "—— 毛泽东" },
-    { text: "下定决心，不怕牺牲，排除万难，去争取胜利。", from: "—— 毛泽东" },
-    { text: "苦不苦，想想红军二万五；累不累，想想革命老前辈。", from: "—— 民间流传" }
-  ];
-
-  // 渲染英雄卡片
-  const heroesEl = document.getElementById("heroes");
-  heroes.forEach(h => {
-    const card = document.createElement("div");
-    card.className = "card reveal";
-    card.innerHTML = `
-      <div class="name">${h.name}</div>
-      <div class="role">${h.role}</div>
-      <div class="brief">${h.brief}</div>
-      <div class="more">点击展开 ↕</div>
-      <div class="detail">${h.detail}</div>`;
-    card.addEventListener("click", () => {
-      card.classList.toggle("open");
-      card.querySelector(".more").textContent = card.classList.contains("open") ? "收起 ↕" : "点击展开 ↕";
-    });
-    heroesEl.appendChild(card);
+  /* 右侧刻度 */
+  var ticksBox=document.getElementById('ticks'),tks=[];
+  scenes.forEach(function(s){
+    var d=document.createElement('div');d.className='tk';
+    d.innerHTML='<i></i>'+s.getAttribute('data-ch')+' · '+s.getAttribute('data-name');
+    ticksBox.appendChild(d);tks.push(d);
   });
 
-  // 渲染名言
-  const quotesEl = document.getElementById("quotes");
-  quotes.forEach(q => {
-    const div = document.createElement("div");
-    div.className = "quote reveal";
-    div.innerHTML = `<div class="text">${q.text}</div><div class="from">${q.from}</div>`;
-    quotesEl.appendChild(div);
+  /* 悬浮地图 */
+  var SVGNS='http://www.w3.org/2000/svg';
+  var mp=document.getElementById('mappath'),mb=document.getElementById('mappathOn');
+  var L=mp.getTotalLength();
+  mb.style.strokeDasharray=L;mb.style.strokeDashoffset=L;
+  var labels=['瑞金','于都','湘江','遵义','赤水','金沙','泸定','雪山','草地','会宁'];
+  var ng=document.getElementById('mapnodes'),nowEl=document.getElementById('mapNow'),nps=[];
+  labels.forEach(function(t,i){
+    var pt=mp.getPointAtLength(L*i/(labels.length-1));
+    var c=document.createElementNS(SVGNS,'circle');
+    c.setAttribute('cx',pt.x);c.setAttribute('cy',pt.y);c.setAttribute('r',4);c.setAttribute('fill','#4a3822');
+    ng.appendChild(c);nps.push(c);
+    var tx=document.createElementNS(SVGNS,'text');
+    tx.setAttribute('x',pt.x+(i%2?9:-9));tx.setAttribute('y',pt.y+4);
+    tx.setAttribute('text-anchor',i%2?'start':'end');
+    tx.setAttribute('fill','#8a7248');tx.setAttribute('font-size','11');
+    tx.textContent=t;ng.appendChild(tx);
+  });
+  var panel=document.getElementById('mappanel'),btn=document.getElementById('mapbtn');
+  btn.addEventListener('click',function(e){e.stopPropagation();panel.classList.toggle('open');});
+  document.addEventListener('click',function(e){
+    if(panel.classList.contains('open')&&!panel.contains(e.target)&&e.target!==btn)panel.classList.remove('open');
   });
 
-  // 滚动进度条
-  const progress = document.getElementById("progress");
-  window.addEventListener("scroll", () => {
-    const h = document.documentElement;
-    const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
-    progress.style.width = scrolled + "%";
-  }, { passive: true });
+  /* 鼠标视差（缓动） */
+  var stage=document.getElementById('stage'),mx=0,my=0,cx=0,cy=0;
+  addEventListener('mousemove',function(e){
+    mx=(e.clientX/innerWidth-.5)*16;my=(e.clientY/innerHeight-.5)*11;
+  });
 
-  // 进入视口动效
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("show"); });
-  }, { threshold: 0.15 });
-  document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+  var chapN=document.getElementById('chapN'),chapT=document.getElementById('chapT');
+  var pbar=document.getElementById('pbar'),hint=document.getElementById('hint');
+  function loop(){
+    var max=document.documentElement.scrollHeight-innerHeight;
+    var p=max>0?Math.min(1,Math.max(0,scrollY/max)):0;
+    var f=p*(N-1);
+    for(var i=0;i<N;i++){
+      var v=Math.max(0,1-Math.abs(f-i)*2.3),s=scenes[i];
+      s.style.opacity=v;s.style.visibility=v<=0.01?'hidden':'visible';
+      s.classList.toggle('on',v>0.35);
+    }
+    var idx=Math.max(0,Math.round(f));
+    if(idx!==last){
+      last=idx;
+      big.textContent=scenes[idx].getAttribute('data-char');
+      big.classList.remove('go');void big.offsetWidth;big.classList.add('go');
+      tks.forEach(function(t,k){t.classList.toggle('on',k===idx);});
+      chapN.textContent='第'+scenes[idx].getAttribute('data-ch')+'幕';
+      chapT.textContent=scenes[idx].getAttribute('data-name');
+      var ni=Math.round(idx/(N-1)*(labels.length-1));
+      nps.forEach(function(c,k){c.setAttribute('fill',k<=ni?'#d9b56a':'#4a3822');});
+      nowEl.textContent=labels[ni];
+    }
+    mb.style.strokeDashoffset=L*(1-p);
+    pbar.style.width=(p*100)+'%';
+    cx+=(mx-cx)*.05;cy+=(my-cy)*.05;
+    stage.style.transform='translate('+cx+'px,'+cy+'px)';
+    if(scrollY>60)hint.classList.add('off');
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  /* 引导页 + 合成音景：弦垫 + 远钟 + 风声 */
+  var actx=null,master=null,muted=false,chI=0;
+  var CHORDS=[[130.81,196,261.63,329.63],[98,196,246.94,293.66],[110,220,261.63,329.63],[87.31,174.61,220,349.23]];
+  function pad(){
+    if(!actx)return;var t=actx.currentTime;
+    CHORDS[chI%CHORDS.length].forEach(function(f){
+      var o=actx.createOscillator(),g=actx.createGain();
+      o.type='sine';o.frequency.value=f;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(.05,t+2.6);
+      g.gain.setValueAtTime(.05,t+4.8);
+      g.gain.linearRampToValueAtTime(0,t+7.6);
+      o.connect(g);g.connect(master);o.start(t);o.stop(t+7.8);
+    });chI++;
+  }
+  function bell(){
+    if(!actx||muted)return;var t=actx.currentTime;
+    var o=actx.createOscillator(),g=actx.createGain();
+    o.type='sine';o.frequency.value=[523.25,659.25,783.99][Math.floor(Math.random()*3)];
+    g.gain.setValueAtTime(.065,t);
+    g.gain.exponentialRampToValueAtTime(.0001,t+3.8);
+    o.connect(g);g.connect(master);o.start(t);o.stop(t+4);
+  }
+  function wind(){
+    if(!actx)return;
+    var len=actx.sampleRate*3,buf=actx.createBuffer(1,len,actx.sampleRate),d=buf.getChannelData(0);
+    for(var i=0;i<len;i++)d[i]=Math.random()*2-1;
+    var src=actx.createBufferSource();src.buffer=buf;src.loop=true;
+    var flt=actx.createBiquadFilter();flt.type='lowpass';flt.frequency.value=320;flt.Q.value=.7;
+    var g=actx.createGain();g.gain.value=.018;
+    var lfo=actx.createOscillator(),lg=actx.createGain();
+    lfo.frequency.value=.13;lg.gain.value=.01;
+    lfo.connect(lg);lg.connect(g.gain);
+    src.connect(flt);flt.connect(g);g.connect(master);
+    src.start();lfo.start();
+  }
+  document.getElementById('start').addEventListener('click',function(){
+    document.getElementById('gate').classList.add('off');
+    document.body.classList.remove('pre');
+    try{
+      actx=new (window.AudioContext||window.webkitAudioContext)();
+      master=actx.createGain();master.gain.value=.55;master.connect(actx.destination);
+      pad();setInterval(pad,7200);
+      setInterval(function(){if(Math.random()<.6)bell();},11000);
+      wind();
+    }catch(e){}
+  });
+  var muteBtn=document.getElementById('mute');
+  muteBtn.addEventListener('click',function(){
+    muted=!muted;
+    if(master)master.gain.value=muted?0:.55;
+    muteBtn.textContent=muted?'🔇 音乐：关':'🔊 音乐：开';
+  });
+})();
 </script>
 </body>
 </html>
