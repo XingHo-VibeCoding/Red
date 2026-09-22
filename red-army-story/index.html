@@ -110,6 +110,15 @@ body.pre{overflow:hidden}
 @media (prefers-reduced-motion: reduce){
   *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+  /* Day 8 四态（加载 / 空 / 错误）覆盖层 */
+  #stateLayer{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:rgba(12,7,4,.78);backdrop-filter:blur(4px);}
+  #stateLayer.show{display:flex;}
+  #stateLayer .spin{width:34px;height:34px;border-radius:50%;border:2px solid rgba(217,181,106,.25);border-top-color:#d9b56a;animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #stateLayer .stxt{font-family:'Noto Serif SC','Songti SC',serif;color:#d9b56a;font-size:15px;letter-spacing:.25em;}
+  #stateLayer #stateRetry{font-family:inherit;background:none;border:1px solid rgba(217,181,106,.6);color:#d9b56a;padding:9px 28px;letter-spacing:.3em;cursor:pointer;transition:.3s;}
+  #stateLayer #stateRetry:hover{background:rgba(217,181,106,.12);}
+  @media (prefers-reduced-motion: reduce){#stateLayer .spin{animation:none;border-color:rgba(217,181,106,.5);}}
 </style>
 </head>
 <body class="pre">
@@ -325,12 +334,8 @@ body.pre{overflow:hidden}
     <circle cx="880" cy="200" r="2.4" fill="rgba(232,200,119,.25)" style="animation:fall 17s linear infinite -6s"/>
     <circle cx="1000" cy="330" r="1.8" fill="rgba(232,200,119,.3)" style="animation:fall 12s linear infinite -3s"/>
   </svg>
-  <div class="wm">灯</div>
-  <div class="copy bold">
-    <span class="k rv" style="transition-delay:.1s">一九三五年一月 · 遵义会议</span>
-    <p class="b rv" style="transition-delay:.24s">往哪儿走，比走多快重要。</p>
-    <span class="s rv" style="transition-delay:.42s">一盏灯 · 一张桌 · 一次彻底的清算</span>
-  </div>
+  <div class="wm"></div>
+  <div class="copy"></div>
 </section>
 
 <!-- 伍 · 赤水 -->
@@ -522,12 +527,8 @@ body.pre{overflow:hidden}
       <use href="#man" transform="translate(962,610) scale(1.08) rotate(-14)"/>
     </g>
   </svg>
-  <div class="wm">泽</div>
-  <div class="copy fine">
-    <span class="k rv" style="transition-delay:.1s">一九三五年八月 · 松潘草地</span>
-    <h2 class="rv" style="transition-delay:.22s">没有路的地方</h2>
-    <p class="rv" style="transition-delay:.38s">没有路，没有树，没有鸟。草甸下面是泥潭，踩错一步就再也上不来。粮食吃完了煮皮带，篝火点着了又灭。夜里有人背靠背坐下，就再没有醒来。<em>草地吞下了很多人，却没能吞下这支队伍。</em></p>
-  </div>
+  <div class="wm"></div>
+  <div class="copy"></div>
 </section>
 
 <!-- 拾 · 会师 -->
@@ -613,6 +614,79 @@ body.pre{overflow:hidden}
 
 <script>
 (function(){
+  /* ===== Mock 数据（Day 8）：全部十幕的文案与元数据，即"本地假数据"。
+     未来接真实 API 时，只需把本数组换成接口返回的数据，渲染与视觉零改动（落实 PRD §6 预留的"数据接口位"）===== */
+  var SCENES=[
+    {ch:'壹',name:'围',  char:'围',style:'fine',k:'一九三四年 · 秋',h2:'堡垒，圈到了门口',
+     p:'堡垒一步步向前修，苏区一寸寸向后让。广昌失守，兴国告急；粮食见了底，盐比银贵。有人卸下自家的门板送去扎担架——都明白：<em>留下来，是死；走出去，未必活。</em>'},
+    {ch:'贰',name:'出发',char:'别',style:'bold',k:'一九三四年十月十七日夜 · 于都河',b:'八万六千人，一夜过河。',s:'门板卸了 · 摆渡的船 · 没有回去的路'},
+    {ch:'叁',name:'湘江',char:'血',style:'fine',k:'一九三四年十二月初 · 湘江',h2:'江水，是红的',
+     p:'为中央纵队多抬一台机器，就多慢一步；多慢一步，就多倒下一些人。五天五夜，八万人只剩三万。师长陈树湘负伤被俘，绞断了自己的肠子——那年他二十九岁。<em>湘江之后，再没有人怀疑：老路，走不通了。</em>'},
+    {ch:'肆',name:'遵义',char:'灯',style:'bold',k:'一九三五年一月 · 遵义会议',b:'往哪儿走，比走多快重要。',s:'一盏灯 · 一张桌 · 一次彻底的清算'},
+    {ch:'伍',name:'赤水',char:'变',style:'fine',k:'一九三五年一月至三月 · 赤水河',h2:'同一条河，走了四回',
+     p:'敌人往东，我们向西；敌人回头，我们再回头。地图上绕出一个个圈，把几十万追兵绕得晕头转向。<em>四渡赤水，靠的不是运气——是把"走"本身，走成了武器。</em>'},
+    {ch:'陆',name:'金沙',char:'跃',style:'bold',k:'一九三五年五月 · 金沙江皎平渡',b:'七只小船，渡了一支军队。',s:'七天七夜 · 几万人的方面军 · 一人未失'},
+    {ch:'柒',name:'泸定',char:'索',style:'fine',k:'一九三五年五月廿九 · 大渡河泸定桥',h2:'十三根铁索',
+     p:'桥板被拆，只剩十三根寒光凛凛的铁索。对岸枪口喷火，脚下是几十丈激流。二十二个人攀着铁索向前爬，身后的战友把木板一块块铺回来。<em>桥是铁的；过去的那批人，是钢的。</em>'},
+    {ch:'捌',name:'雪山',char:'雪',style:'bold',k:'一九三五年六月 · 夹金山',b:'最冷的地方，站着一群最热的人。',s:'单衣 · 草鞋 · 四千多米的垭口'},
+    {ch:'玖',name:'草地',char:'泽',style:'fine',k:'一九三五年八月 · 松潘草地',h2:'没有路的地方',
+     p:'没有路，没有树，没有鸟。草甸下面是泥潭，踩错一步就再也上不来。粮食吃完了煮皮带，篝火点着了又灭。夜里有人背靠背坐下，就再没有醒来。<em>草地吞下了很多人，却没能吞下这支队伍。</em>'},
+    {ch:'拾',name:'会师',char:'会',style:'bold',k:'一九三六年十月 · 会宁 · 将台堡',b:'二万五千里，走完了。',s:'宣言书 · 宣传队 · 播种机',
+     fin:'他们把最远的一条路，走成了最近的一条路——<br>而<b>我们</b>，正走在他们换来的今天里。'}
+  ];
+
+  /* ===== 可复用"幕卡片"渲染组件（Day 8 余力加练）：输入一个幕容器 + 一条数据，渲染完整文案块 ===== */
+  function renderSceneCard(el,d){
+    el.setAttribute('data-ch',d.ch);
+    el.setAttribute('data-name',d.name);
+    el.setAttribute('data-char',d.char);
+    var wm=el.querySelector('.wm');if(wm)wm.textContent=d.char;
+    var copy=el.querySelector('.copy');if(!copy)return;
+    copy.className='copy '+d.style;
+    var h='<span class="k rv" style="transition-delay:.1s">'+d.k+'</span>';
+    if(d.style==='fine'){
+      h+='<h2 class="rv" style="transition-delay:.22s">'+d.h2+'</h2>';
+      h+='<p class="rv" style="transition-delay:.38s">'+d.p+'</p>';
+    }else{
+      h+='<p class="b rv" style="transition-delay:.24s">'+d.b+'</p>';
+      if(d.s)h+='<span class="s rv" style="transition-delay:.42s">'+d.s+'</span>';
+      if(d.fin)h+='<div class="fin rv" style="transition-delay:.6s">'+d.fin+'</div>';
+    }
+    copy.innerHTML=h;
+  }
+
+  /* ===== 四种页面状态（Day 8）：加载 / 空 / 错误 / 正常 =====
+     正常态 = 下方正常渲染；渲染失败走错误态（可点"重新加载"），数据为空走空态，绝不白屏 */
+  var stateLayer=document.createElement('div');
+  stateLayer.id='stateLayer';
+  document.body.appendChild(stateLayer);
+  function showState(type,msg){
+    stateLayer.className='show';
+    stateLayer.innerHTML=(type==='loading'?'<div class="spin"></div>':'')+
+      '<div class="stxt">'+msg+'</div>'+
+      (type==='error'?'<button id="stateRetry">重新加载</button>':'');
+    var r=document.getElementById('stateRetry');
+    if(r)r.addEventListener('click',function(){location.reload();});
+  }
+  function hideState(){stateLayer.className='';}
+
+  showState('loading','正在铺开画卷…');
+  var renderOk=false;
+  try{
+    if(!SCENES.length){                       /* 空态：假数据为空 */
+      showState('empty','内容筹备中——叙事画卷暂无数据');
+    }else{                                    /* 正常态：由 mock 数据渲染全部幕 */
+      [].slice.call(document.querySelectorAll('.scene')).forEach(function(el,i){
+        if(SCENES[i])renderSceneCard(el,SCENES[i]);
+      });
+      renderOk=true;
+    }
+  }catch(e){                                  /* 错误态：渲染异常的兜底 */
+    showState('error','画卷展开时遇到了问题，请重试');
+  }
+  if(renderOk)setTimeout(hideState,600);      /* 加载态稍作停留后进入正常态 */
+  if(!renderOk)return;                        /* 空态/错误态下不再初始化滚动叙事 */
+
   var scenes=[].slice.call(document.querySelectorAll('.scene'));
   var N=scenes.length;
   document.getElementById('spacer').style.height=(N*170+50)+'vh';
