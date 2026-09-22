@@ -53,6 +53,18 @@ body.pre{overflow:hidden}
 #mapbtn{position:fixed;left:30px;bottom:30px;z-index:40;width:54px;height:54px;border-radius:50%;border:1px solid rgba(217,181,106,.45);background:rgba(14,9,6,.55);color:var(--gold);cursor:pointer;font-size:19px;display:flex;align-items:center;justify-content:center;transition:all .4s;backdrop-filter:blur(6px)}
 #mapbtn:hover{box-shadow:0 0 26px rgba(217,181,106,.35);border-color:var(--gold);transform:scale(1.06)}
 #mappanel{position:fixed;left:30px;bottom:98px;z-index:40;width:296px;background:rgba(13,8,5,.82);border:1px solid rgba(217,181,106,.25);border-radius:12px;padding:18px 16px 12px;opacity:0;pointer-events:none;transform:translateY(14px) scale(.97);transition:all .45s cubic-bezier(.2,.7,.2,1);backdrop-filter:blur(14px);box-shadow:0 24px 70px rgba(0,0,0,.6)}
+/* Day 11：史实注交互（展开/收起）——按钮反馈 + 卡片滑入 + 焦点态 */
+#factbtn{position:fixed;right:30px;bottom:30px;z-index:40;width:54px;height:54px;border-radius:50%;border:1px solid rgba(217,181,106,.45);background:rgba(14,9,6,.55);color:var(--gold);cursor:pointer;font-family:inherit;font-size:22px;font-weight:700;transition:all .35s;backdrop-filter:blur(6px)}
+#factbtn:hover{border-color:var(--gold);box-shadow:0 0 18px rgba(217,181,106,.4)}
+#factbtn:active{transform:scale(.88)}
+#factbtn.open{background:var(--gold);color:#241505;box-shadow:0 0 24px rgba(217,181,106,.55)}
+#factbtn:focus-visible,#factclose:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+#factcard{position:fixed;right:30px;bottom:98px;z-index:40;width:min(370px,84vw);background:rgba(13,8,5,.9);border:1px solid rgba(217,181,106,.32);border-radius:12px;padding:16px 18px 13px;opacity:0;pointer-events:none;transform:translateY(16px) scale(.96);transition:all .45s cubic-bezier(.2,.7,.2,1);backdrop-filter:blur(14px);box-shadow:0 24px 70px rgba(0,0,0,.6)}
+#factcard.open{opacity:1;pointer-events:auto;transform:none}
+#factcard .fct{font-size:12px;letter-spacing:.32em;color:var(--gold);margin-bottom:9px}
+#factcard p{font-size:13.5px;line-height:1.95;color:#e6d6ae;margin:0 0 11px;transition:opacity .22s}
+#factclose{font-family:inherit;font-size:12px;letter-spacing:.22em;color:var(--dim);background:none;border:1px solid rgba(154,127,85,.35);border-radius:14px;padding:5px 15px;cursor:pointer;transition:all .3s}
+#factclose:hover{color:var(--gold);border-color:var(--gold)}
 #mappanel.open{opacity:1;pointer-events:auto;transform:none}
 #mappanel h4{color:var(--gold);font-size:12px;letter-spacing:.34em;margin-bottom:8px;font-weight:400}
 #mappanel .now{font-size:12px;color:var(--dim);letter-spacing:.2em;margin-top:8px;border-top:1px solid rgba(217,181,106,.15);padding-top:9px}
@@ -289,7 +301,7 @@ body.pre{overflow:hidden}
 
 <div class="vignette"></div>
 <!-- 史实标注（PRD §5：涉及具体史实处标注「待核实」） -->
-<div style="position:fixed;right:30px;bottom:30px;z-index:6;font-size:12px;letter-spacing:.12em;color:var(--dim);font-family:'Noto Serif SC',serif;pointer-events:none">※ 史实细节为常见表述整理 · 正式版逐条核实来源</div>
+<div style="position:fixed;right:96px;bottom:30px;z-index:6;font-size:12px;letter-spacing:.12em;color:var(--dim);font-family:'Noto Serif SC',serif;pointer-events:none">※ 史实细节为常见表述整理 · 正式版逐条核实来源</div>
 <svg id="grain" width="100%" height="100%">
   <filter id="nz"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
   <rect width="100%" height="100%" filter="url(#nz)"/>
@@ -313,21 +325,31 @@ body.pre{overflow:hidden}
      未来接真实 API 时，只需把本数组换成接口返回的数据，渲染与视觉零改动（落实 PRD §6 预留的"数据接口位"）===== */
   var SCENES=[
     {ch:'壹',name:'围',  char:'围',style:'fine',k:'一九三四年 · 秋',h2:'堡垒，圈到了门口',
-     p:'堡垒一步步向前修，苏区一寸寸向后让。广昌失守，兴国告急；粮食见了底，盐比银贵。有人卸下自家的门板送去扎担架——都明白：<em>留下来，是死；走出去，未必活。</em>'},
-    {ch:'贰',name:'出发',char:'别',style:'bold',k:'一九三四年十月十七日夜 · 于都河',b:'八万六千人，一夜过河。',s:'门板卸了 · 摆渡的船 · 没有回去的路'},
+     p:'堡垒一步步向前修，苏区一寸寸向后让。广昌失守，兴国告急；粮食见了底，盐比银贵。有人卸下自家的门板送去扎担架——都明白：<em>留下来，是死；走出去，未必活。</em>',
+     fact:'1933年9月起，第五次反"围剿"打成"堡垒对堡垒"的阵地战，苏区步步收缩。1934年4月广昌失守后，中央红军被迫准备战略转移。'},
+    {ch:'贰',name:'出发',char:'别',style:'bold',k:'一九三四年十月十七日夜 · 于都河',b:'八万六千人，一夜过河。',s:'门板卸了 · 摆渡的船 · 没有回去的路',
+     fact:'1934年10月17日晚起，中央红军8.6万余人从于都出发。乡亲们卸下门板、捐出木材架设浮桥，于都河夜渡由此成为长征起点的象征。'},
     {ch:'叁',name:'湘江',char:'血',style:'fine',k:'一九三四年十二月初 · 湘江',h2:'江水，是红的',
-     p:'为中央纵队多抬一台机器，就多慢一步；多慢一步，就多倒下一些人。五天五夜，八万人只剩三万。师长陈树湘负伤被俘，绞断了自己的肠子——那年他二十九岁。<em>湘江之后，再没有人怀疑：老路，走不通了。</em>'},
-    {ch:'肆',name:'遵义',char:'灯',style:'bold',k:'一九三五年一月 · 遵义会议',b:'往哪儿走，比走多快重要。',s:'一盏灯 · 一张桌 · 一次彻底的清算'},
+     p:'为中央纵队多抬一台机器，就多慢一步；多慢一步，就多倒下一些人。五天五夜，八万人只剩三万。师长陈树湘负伤被俘，绞断了自己的肠子——那年他二十九岁。<em>湘江之后，再没有人怀疑：老路，走不通了。</em>',
+     fact:'湘江战役是长征初期最惨烈的一战，中央红军由8.6万余人锐减至3万余人。红34师师长陈树湘腹部中弹被俘，乘敌不备绞断肠子壮烈牺牲，年仅29岁。'},
+    {ch:'肆',name:'遵义',char:'灯',style:'bold',k:'一九三五年一月 · 遵义会议',b:'往哪儿走，比走多快重要。',s:'一盏灯 · 一张桌 · 一次彻底的清算',
+     fact:'1935年1月15日至17日，中共中央政治局扩大会议在遵义柏辉章公馆召开，事实上确立了毛泽东在党中央和红军的领导地位，成为党的历史上生死攸关的转折点。'},
     {ch:'伍',name:'赤水',char:'变',style:'fine',k:'一九三五年一月至三月 · 赤水河',h2:'同一条河，走了四回',
-     p:'敌人往东，我们向西；敌人回头，我们再回头。地图上绕出一个个圈，把几十万追兵绕得晕头转向。<em>四渡赤水，靠的不是运气——是把"走"本身，走成了武器。</em>'},
-    {ch:'陆',name:'金沙',char:'跃',style:'bold',k:'一九三五年五月 · 金沙江皎平渡',b:'七只小船，渡了一支军队。',s:'七天七夜 · 几万人的方面军 · 一人未失'},
+     p:'敌人往东，我们向西；敌人回头，我们再回头。地图上绕出一个个圈，把几十万追兵绕得晕头转向。<em>四渡赤水，靠的不是运气——是把"走"本身，走成了武器。</em>',
+     fact:'三个月内四渡赤水：一渡土城、二渡太平渡、三渡茅台、四渡二郎滩。大范围迂回调动敌军，被毛泽东自己称为军事指挥的"得意之笔"。'},
+    {ch:'陆',name:'金沙',char:'跃',style:'bold',k:'一九三五年五月 · 金沙江皎平渡',b:'七只小船，渡了一支军队。',s:'七天七夜 · 几万人的方面军 · 一人未失',
+     fact:'1935年5月，红军先遣队智取皎平渡，找到7只小船，依靠36名船工7天7夜往返摆渡，3万余人全部过江，未损一兵一卒，彻底跳出数十万敌军的包围圈。'},
     {ch:'柒',name:'泸定',char:'索',style:'fine',k:'一九三五年五月廿九 · 大渡河泸定桥',h2:'十三根铁索',
-     p:'桥板被拆，只剩十三根寒光凛凛的铁索。对岸枪口喷火，脚下是几十丈激流。二十二个人攀着铁索向前爬，身后的战友把木板一块块铺回来。<em>桥是铁的；过去的那批人，是钢的。</em>'},
-    {ch:'捌',name:'雪山',char:'雪',style:'bold',k:'一九三五年六月 · 夹金山',b:'最冷的地方，站着一群最热的人。',s:'单衣 · 草鞋 · 四千多米的垭口'},
+     p:'桥板被拆，只剩十三根寒光凛凛的铁索。对岸枪口喷火，脚下是几十丈激流。二十二个人攀着铁索向前爬，身后的战友把木板一块块铺回来。<em>桥是铁的；过去的那批人，是钢的。</em>',
+     fact:'1935年5月29日，红4团一昼夜急行军240里赶到泸定桥，22名突击队员冒枪林弹雨攀铁索冲击，夺下东桥头，为全军打开北上通道。'},
+    {ch:'捌',name:'雪山',char:'雪',style:'bold',k:'一九三五年六月 · 夹金山',b:'最冷的地方，站着一群最热的人。',s:'单衣 · 草鞋 · 四千多米的垭口',
+     fact:'1935年6月，红军翻越第一座大雪山——夹金山（海拔约4114米）。多数战士只有单衣草鞋，山上空气稀薄、天气骤变，许多再没走下雪线。'},
     {ch:'玖',name:'草地',char:'泽',style:'fine',k:'一九三五年八月 · 松潘草地',h2:'没有路的地方',
-     p:'没有路，没有树，没有鸟。草甸下面是泥潭，踩错一步就再也上不来。粮食吃完了煮皮带，篝火点着了又灭。夜里有人背靠背坐下，就再没有醒来。<em>草地吞下了很多人，却没能吞下这支队伍。</em>'},
+     p:'没有路，没有树，没有鸟。草甸下面是泥潭，踩错一步就再也上不来。粮食吃完了煮皮带，篝火点着了又灭。夜里有人背靠背坐下，就再没有醒来。<em>草地吞下了很多人，却没能吞下这支队伍。</em>',
+     fact:'1935年8月，红军穿越松潘草地，约7昼夜。草甸下是泥沼，粮食断绝后煮皮带、挖野菜充饥，无数战士长眠于此。"背靠背"过夜是那段路真实的记忆。'},
     {ch:'拾',name:'会师',char:'会',style:'bold',k:'一九三六年十月 · 会宁 · 将台堡',b:'二万五千里，走完了。',s:'宣言书 · 宣传队 · 播种机',
-     fin:'他们把最远的一条路，走成了最近的一条路——<br>而<b>我们</b>，正走在他们换来的今天里。'}
+     fin:'他们把最远的一条路，走成了最近的一条路——<br>而<b>我们</b>，正走在他们换来的今天里。',
+     fact:'1936年10月，红一、红二、红四方面军先后在甘肃会宁和宁夏将台堡会师，宣告历时两年、纵横十余省的长征胜利结束。'}
   ];
 
   /* ===== 可复用"幕卡片"渲染组件（Day 8 余力加练）：输入一个幕容器 + 一条数据，渲染完整文案块 ===== */
@@ -417,6 +439,43 @@ body.pre{overflow:hidden}
   btn.addEventListener('click',function(e){e.stopPropagation();panel.classList.toggle('open');});
   document.addEventListener('click',function(e){
     if(panel.classList.contains('open')&&!panel.contains(e.target)&&e.target!==btn)panel.classList.remove('open');
+  });
+
+  /* Day 11：史实注（展开/收起交互）——让"生效了"可以被一眼看见：
+     ①按钮点亮反色 + 按压缩放（状态信号） ②卡片滑入/滑出动效（位置变化）
+     ③内容随幕即时更新（滚到哪一幕，注就换到哪一幕）；Esc 关闭，焦点态走 :focus-visible */
+  var factbtn=document.createElement('button');
+  factbtn.id='factbtn';factbtn.type='button';factbtn.textContent='史';
+  factbtn.title='史实注（展开/收起）';
+  factbtn.setAttribute('aria-expanded','false');
+  factbtn.setAttribute('aria-controls','factcard');
+  document.body.appendChild(factbtn);
+  var factcard=document.createElement('div');
+  factcard.id='factcard';factcard.setAttribute('role','region');factcard.setAttribute('aria-label','史实注');
+  factcard.setAttribute('aria-hidden','true');
+  factcard.innerHTML='<div class="fct">史实注 · <span id="factName"></span></div><p id="factTxt"></p><button id="factclose" type="button">收起</button>';
+  document.body.appendChild(factcard);
+  var factTxt=document.getElementById('factTxt'),factName=document.getElementById('factName');
+  var factOpen=false,factShown=-1;
+  function setFact(i,instant){
+    if(factShown===i&&!instant)return;
+    factShown=i;factName.textContent='第'+SCENES[i].ch+'幕 · '+SCENES[i].name;
+    if(instant||!factOpen){factTxt.textContent=SCENES[i].fact||'——';return;}
+    factTxt.style.opacity=0;
+    setTimeout(function(){factTxt.textContent=SCENES[i].fact||'——';factTxt.style.opacity=1;},220);
+  }
+  function toggleFact(open){
+    factOpen=(open===undefined)?!factOpen:open;
+    factcard.classList.toggle('open',factOpen);
+    factbtn.classList.toggle('open',factOpen);
+    factbtn.setAttribute('aria-expanded',factOpen?'true':'false');
+    factcard.setAttribute('aria-hidden',factOpen?'false':'true');
+    if(factOpen)setFact(last,true);
+  }
+  factbtn.addEventListener('click',function(){toggleFact();});
+  document.getElementById('factclose').addEventListener('click',function(){toggleFact(false);factbtn.focus();});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&factOpen){toggleFact(false);factbtn.focus();}
   });
 
   /* 鼠标视差（缓动） */
@@ -566,6 +625,7 @@ body.pre{overflow:hidden}
       var ni=Math.round(idx/(N-1)*(labels.length-1));
       nps.forEach(function(c,k){c.setAttribute('fill',k<=ni?'#d9b56a':'#4a3822');});
       nowEl.textContent=labels[ni];
+      if(factOpen)setFact(idx);
     }
     mb.style.strokeDashoffset=L*(1-p);
     pbar.style.width=(p*100)+'%';
