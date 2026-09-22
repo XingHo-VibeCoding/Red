@@ -65,6 +65,9 @@ body.pre{overflow:hidden}
 .scene svg{position:absolute;inset:0;width:100%;height:100%;animation:kb 30s ease-in-out infinite alternate}
 @keyframes kb{from{transform:scale(1.015)}to{transform:scale(1.075)}}
 .scene:nth-child(2n) svg{animation-duration:36s;animation-direction:alternate-reverse}
+/* 插画场景层（Day 10 · 路线甲：AI 生成正形纹样插画，base64 内嵌） */
+.photo-layer{position:absolute;inset:0;background-size:cover;background-position:center 38%;animation:kb 30s ease-in-out infinite alternate;z-index:1}
+.photo-layer::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,.66) 0%,rgba(10,8,6,.12) 42%,rgba(10,8,6,.28) 78%,rgba(10,8,6,.5) 100%)}
 .wm{position:absolute;right:1vw;bottom:-9vh;font-size:64vh;line-height:1;font-weight:900;color:transparent;-webkit-text-stroke:1.5px rgba(217,181,106,.09);z-index:2;pointer-events:none;user-select:none}
 /* ============ 文案 ============ */
 .copy{position:absolute;z-index:6}
@@ -419,36 +422,7 @@ body.pre{overflow:hidden}
 
 <!-- 柒 · 泸定 -->
 <section class="scene" data-ch="柒" data-name="泸定" data-char="索">
-  <svg viewBox="0 0 1200 675" preserveAspectRatio="xMidYMid slice">
-    <defs>
-      <radialGradient id="g7" cx="50%" cy="0%" r="120%">
-        <stop offset="0%" stop-color="#1a1714"/><stop offset="55%" stop-color="#12100e"/><stop offset="100%" stop-color="#0a0908"/>
-      </radialGradient>
-    </defs>
-    <rect width="1200" height="675" fill="url(#g7)"/>
-    <polygon points="0,0 0,540 170,320 300,540" fill="#0a0908"/>
-    <polygon points="1200,0 1200,560 1040,330 900,560" fill="#090807"/>
-    <rect y="640" width="1200" height="35" fill="#0d141c"/>
-    <g stroke="#4a4238" fill="none">
-      <path d="M140,320 Q600,392 1060,308" stroke-width="3.2" style="animation:bob 5s ease-in-out infinite"/>
-      <path d="M140,336 Q600,404 1060,324" stroke-width="3" style="animation:bob 5s ease-in-out infinite -.6s"/>
-      <path d="M140,352 Q600,416 1060,340" stroke-width="2.8" style="animation:bob 5s ease-in-out infinite -1.1s"/>
-      <path d="M140,368 Q600,428 1060,356" stroke-width="2.6" style="animation:bob 5s ease-in-out infinite -1.7s"/>
-      <path d="M140,384 Q600,440 1060,372" stroke-width="2.4" style="animation:bob 5s ease-in-out infinite -2.3s"/>
-    </g>
-    <g fill="#26201a">
-      <rect x="330" y="392" width="34" height="7" rx="1"/>
-      <rect x="420" y="402" width="34" height="7" rx="1"/>
-      <rect x="820" y="398" width="34" height="7" rx="1"/>
-    </g>
-    <g>
-      <animateTransform attributeName="transform" type="translate" values="250,352;860,330" dur="16s" repeatCount="indefinite"/>
-      <use href="#man" transform="rotate(-8) scale(1.15)" fill="#0a0806"/>
-    </g>
-    <circle cx="1052" cy="330" r="11" fill="rgba(255,157,92,.2)"/>
-    <circle cx="1052" cy="330" r="5" fill="#ff9d5c" style="animation:flick 1.3s infinite"/>
-    <circle cx="1030" cy="356" r="4" fill="#ffd27a" style="animation:flick 1.9s infinite .5s"/>
-  </svg>
+  <div class="photo-layer" id="bridgePhoto" role="img" aria-label="飞夺泸定桥插画：红军战士冒着对岸机枪火力，沿铁索匍匐夺桥" style="background-image:url('assets/luding-bridge.png')"></div>
   <div class="wm">索</div>
   <div class="copy fine">
     <span class="k rv" style="transition-delay:.1s">一九三五年五月廿九 · 大渡河泸定桥</span>
