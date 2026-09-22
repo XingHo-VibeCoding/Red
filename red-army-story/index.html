@@ -183,6 +183,63 @@ body.pre{overflow:hidden}
   #mute:active,#mapbtn:active{transform:scale(.93)}
   #start:active{opacity:.7}
   #stateRetry:active{background:rgba(217,181,106,.2)}
+
+  /* ===== Day 13：多视图切换（hash 地址路由） =====
+     三个视图：narrative 卷首叙事（默认）/ gallery 图卷目录 / story 英雄故事。
+     非叙事视图隐藏叙事 UI；视图本体是 fixed 覆盖层，可滚动。 */
+  body:not([data-view="narrative"]) :is(#stage,#spacer,#pbar,#chap,#ticks,#mapbtn,#filterbtn,#factbtn,#factcard,#mappanel,#filterpanel){display:none!important}
+  body.pre #vnav,body.pre .view,body.pre #viewback{display:none!important}
+  #vnav{position:fixed;top:18px;right:22px;z-index:60;display:flex;gap:6px;background:rgba(13,8,5,.72);border:1px solid rgba(217,181,106,.28);border-radius:999px;padding:5px;backdrop-filter:blur(10px)}
+  #vnav button{font-family:'Noto Serif SC',serif;font-size:12px;letter-spacing:.22em;text-indent:.22em;color:var(--dim);background:none;border:1px solid transparent;border-radius:999px;padding:7px 16px;cursor:pointer;transition:.25s}
+  #vnav button:hover{color:var(--gold);border-color:rgba(217,181,106,.4)}
+  #vnav button.cur{color:#1a0f06;background:linear-gradient(135deg,#e8c98a,#c9973f);font-weight:700;box-shadow:0 2px 14px rgba(217,181,106,.35)}
+  #vnav button:focus-visible{outline:2px solid #e8c98a;outline-offset:2px}
+  #viewback{position:fixed;left:22px;top:18px;z-index:60;font-family:'Noto Serif SC',serif;font-size:12px;letter-spacing:.2em;color:var(--dim);background:rgba(13,8,5,.72);border:1px solid rgba(217,181,106,.28);border-radius:999px;padding:8px 18px;cursor:pointer;transition:.25s;backdrop-filter:blur(10px)}
+  #viewback:hover{color:var(--gold);border-color:var(--gold)}
+  #viewback:focus-visible{outline:2px solid #e8c98a;outline-offset:2px}
+  .view{position:fixed;inset:0;z-index:55;display:none;overflow-y:auto;background:rgba(11,7,4,.96);backdrop-filter:blur(8px);padding:84px 6vw 90px}
+  .view::-webkit-scrollbar{width:10px}.view::-webkit-scrollbar-thumb{background:rgba(217,181,106,.25);border-radius:5px}
+  body[data-view="gallery"] #view-gallery{display:block}
+  body[data-view="story"] #view-story{display:block}
+  .view h2.vtitle{font-family:'Noto Serif SC',serif;font-size:clamp(26px,3vw,40px);letter-spacing:.3em;margin:0 0 6px;background:linear-gradient(180deg,#f4e2b0,#c9973f);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 4px 18px rgba(0,0,0,.8))}
+  .vsub{font-size:13px;letter-spacing:.35em;color:var(--dim);margin-bottom:34px}
+  /* 图卷：加载骨架 / 卡片 / 四态 */
+  #gtools{display:flex;gap:10px;align-items:center;margin-bottom:26px;flex-wrap:wrap}
+  #ginput{flex:1;min-width:220px;font-family:'Noto Serif SC',serif;font-size:14px;letter-spacing:.1em;color:#e8dcbf;background:rgba(217,181,106,.06);border:1px solid rgba(217,181,106,.3);border-radius:8px;padding:12px 16px;outline:none;transition:.25s}
+  #ginput:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,181,106,.12)}
+  .gbtn{font-family:'Noto Serif SC',serif;font-size:12px;letter-spacing:.18em;color:#cdbb92;background:none;border:1px solid rgba(217,181,106,.45);border-radius:8px;padding:12px 18px;cursor:pointer;transition:.25s}
+  .gbtn:hover{color:#1a0f06;background:linear-gradient(135deg,#e8c98a,#c9973f)}
+  .gbtn:focus-visible{outline:2px solid #e8c98a;outline-offset:2px}
+  #gfailbtn.off{opacity:.5;border-style:dashed}
+  #gcount{font-size:12px;letter-spacing:.2em;color:var(--dim)}
+  #ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px}
+  .gcard{text-align:left;font-family:'Noto Serif SC',serif;background:rgba(20,12,6,.72);border:1px solid rgba(217,181,106,.22);border-radius:14px;overflow:hidden;cursor:pointer;padding:0;transition:.3s cubic-bezier(.2,.7,.2,1)}
+  .gcard:hover{transform:translateY(-4px);border-color:rgba(217,181,106,.6);box-shadow:0 18px 46px rgba(0,0,0,.55)}
+  .gcard:focus-visible{outline:2px solid #e8c98a;outline-offset:3px}
+  .gthumb{height:132px;background-size:cover;background-position:center 38%;position:relative}
+  .gthumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(11,7,4,.85))}
+  .gnum{position:absolute;left:12px;bottom:8px;z-index:2;font-size:11px;letter-spacing:.25em;color:#e8c98a;text-shadow:0 2px 8px rgba(0,0,0,.9)}
+  .gcard h3{margin:12px 16px 4px;font-size:19px;letter-spacing:.2em;color:#efe0b8}
+  .gcard .gk{margin:0 16px;font-size:11px;letter-spacing:.12em;color:#a89468}
+  .gcard .gfact{margin:8px 16px 16px;font-size:12px;line-height:1.8;color:#b7a67f;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .gskel{border:1px solid rgba(217,181,106,.12);border-radius:14px;overflow:hidden}
+  .gskel .gthumb,.gskel h3,.gskel p{background:linear-gradient(90deg,rgba(217,181,106,.07) 25%,rgba(217,181,106,.16) 45%,rgba(217,181,106,.07) 65%);background-size:200% 100%;animation:skel 1.2s linear infinite;border:none}
+  .gskel h3{height:18px;margin:12px 16px 8px;border-radius:4px}
+  .gskel p{height:12px;margin:0 16px 12px;border-radius:4px}
+  @keyframes skel{to{background-position:-200% 0}}
+  #gstate{display:none;flex-direction:column;align-items:center;gap:18px;padding:70px 0;text-align:center}
+  #gstate.show{display:flex}
+  #gstate .stxt{font-family:'Noto Serif SC',serif;color:#d9b56a;font-size:14px;letter-spacing:.25em}
+  #gstate .stxt b{display:block;font-size:30px;margin-bottom:10px;opacity:.85}
+  /* 英雄故事视图 */
+  .story-block{max-width:760px;margin:0 auto 40px;font-family:'Noto Serif SC',serif}
+  .story-block h3{font-size:20px;letter-spacing:.3em;color:#e8c98a;margin:0 0 14px;display:flex;align-items:center;gap:14px}
+  .story-block h3::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(217,181,106,.4),transparent)}
+  .story-block p{font-size:15px;line-height:2.2;color:#cdbb92;letter-spacing:.06em}
+  .story-block em{color:#e8c98a;font-style:normal;border-bottom:1px solid rgba(217,181,106,.35)}
+  .quote-wall{max-width:760px;margin:0 auto;display:grid;gap:16px}
+  .quote{font-family:'Noto Serif SC',serif;background:rgba(20,12,6,.72);border:1px solid rgba(217,181,106,.22);border-left:3px solid #c9973f;border-radius:10px;padding:18px 22px;font-size:14px;line-height:2;color:#d9c9a0;letter-spacing:.05em}
+  .quote b{display:block;margin-top:6px;font-size:12px;color:#a89468;letter-spacing:.25em;font-weight:400}
 </style>
 </head>
 <body class="pre">
@@ -342,6 +399,40 @@ body.pre{overflow:hidden}
   </svg>
   <div class="now">当前位置 · <b id="mapNow">瑞金</b></div>
 </div>
+
+<!-- 视图二：图卷目录（Day 13，hash 路由 #/gallery，四态齐全） -->
+<section id="view-gallery" class="view" aria-label="图卷 · 幕目录" hidden>
+  <h2 class="vtitle">图 卷</h2>
+  <div class="vsub">十 幕 目 录 · 点 击 回 到 叙 事 中 的 那 一 幕</div>
+  <div id="gtools">
+    <input id="ginput" type="text" placeholder="搜索幕名 / 关键字，如：江 · 雪 · 会师" aria-label="搜索幕目录">
+    <span id="gcount" aria-live="polite"></span>
+    <button id="gclear" class="gbtn" type="button">清空搜索</button>
+    <button id="greload" class="gbtn" type="button">重新加载</button>
+    <button id="gfailbtn" class="gbtn off" type="button" aria-pressed="false">模拟请求失败：关</button>
+  </div>
+  <div id="gstate" role="status"></div>
+  <div id="ggrid" aria-label="幕列表"></div>
+</section>
+
+<!-- 视图三：英雄故事（Day 13，hash 路由 #/story） -->
+<section id="view-story" class="view" aria-label="英雄 · 故事" hidden>
+  <h2 class="vtitle">英 雄</h2>
+  <div class="vsub">一 个 人 · 一 支 断 后 的 队 伍 · 一 句 话</div>
+  <div class="story-block">
+    <h3>陈树湘 · 断肠明志</h3>
+    <p>湘江战役中，红 34 师师长陈树湘率全师担当后卫，掩护中央纵队渡江。弹尽粮绝、腹部中弹，他被俘后乘敌不备，从伤口处绞断自己的肠子，壮烈牺牲，年仅 29 岁——实现了他"<em>为苏维埃新中国流尽最后一滴血</em>"的誓言。红 34 师近六千人，几乎全军尽没，史称"<em>绝命后卫师</em>"。</p>
+  </div>
+  <div class="story-block">
+    <h3>半条被子 · 一颗心</h3>
+    <p>1934 年 11 月，湖南汝城沙洲村，三位借宿的女红军把仅有的一床被子剪下一半，留给村民徐解秀。老人后来常说：<em>什么是共产党？共产党就是自己有一条被子，也要剪下半条给老百姓的人。</em></p>
+  </div>
+  <div class="quote-wall">
+    <div class="quote">"长征是宣言书，长征是宣传队，长征是播种机。"<b>—— 毛泽东</b></div>
+    <div class="quote">"苦不苦，想想红军两万五；累不累，看看革命老前辈。"<b>—— 民间传语</b></div>
+    <div class="quote">"每一代人有每一代人的长征路，每一代人都要走好自己的长征路。"<b>—— 纪念红军长征胜利 80 周年大会</b></div>
+  </div>
+</section>
 
 <script>
 (function(){
@@ -556,6 +647,113 @@ body.pre{overflow:hidden}
   document.getElementById('fclear').addEventListener('click',function(){finput.value='';renderList();finput.focus();});
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape'&&fOpen){toggleFilter(false);fbtn.focus();}
+  });
+
+  /* ===== Day 13：多视图切换（hash 地址路由，够用就好，不引路由库） =====
+     三个视图：narrative 卷首叙事（默认）/ gallery 图卷目录 / story 英雄故事
+     为什么选 hash 路由：①file:// 双击直开也能用（history API 需 http）②刷新/前进后退天然可用 ③对单文件零依赖原则侵入最小 */
+  var GIMG=['scene1-siege','scene2-crossing','scene3-xiangjiang','scene4-zunyi','scene5-chishui','scene6-jinsha','luding-bridge','scene8-xueshan','scene9-caodi','scene10-huishi'];
+  var vnav=document.createElement('nav');
+  vnav.id='vnav';vnav.setAttribute('aria-label','视图切换');
+  [['narrative','卷首'],['gallery','图卷'],['story','英雄']].forEach(function(t){
+    var b=document.createElement('button');b.type='button';b.textContent=t[1];b.setAttribute('data-view',t[0]);
+    b.addEventListener('click',function(){location.hash='#/'+(t[0]==='narrative'?'':t[0]);});
+    vnav.appendChild(b);
+  });
+  document.body.appendChild(vnav);
+  var vback=document.createElement('button');
+  vback.id='viewback';vback.type='button';vback.textContent='← 返回上一页';vback.hidden=true;
+  vback.addEventListener('click',function(){if(history.length>1)history.back();else location.hash='#/';});
+  document.body.appendChild(vback);
+
+  var pendingJump=-1;
+  function curView(){var h=location.hash.replace(/^#\/?/,'');return h==='gallery'||h==='story'?h:'narrative';}
+  function applyView(v){
+    document.body.setAttribute('data-view',v);
+    document.getElementById('view-gallery').hidden=(v!=='gallery');
+    document.getElementById('view-story').hidden=(v!=='story');
+    [].slice.call(vnav.children).forEach(function(b){
+      var on=b.getAttribute('data-view')===v;
+      b.classList.toggle('cur',on);
+      if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+    });
+    vback.hidden=(v==='narrative');
+    if(v==='gallery')loadGallery();
+    if(pendingJump>=0&&v==='narrative'){
+      var j=pendingJump;pendingJump=-1;
+      requestAnimationFrame(function(){requestAnimationFrame(function(){
+        window.scrollTo(0,(document.documentElement.scrollHeight-innerHeight)*(j/(N-1)));
+      });});
+    }
+  }
+  addEventListener('hashchange',function(){applyView(curView());});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&curView()!=='narrative')location.hash='#/';
+  });
+  applyView(curView());
+
+  /* ===== 图卷目录（#/gallery）：列表四态——加载骨架 / 正常 / 空 / 错误 =====
+     模拟异步接口取 SCENES（Day 8 预留的"数据接口位"演示）：真实接入时把 fetchScenes 换成 fetch 即可 */
+  var ggrid=document.getElementById('ggrid'),gstate=document.getElementById('gstate'),
+      ginput=document.getElementById('ginput'),gcount=document.getElementById('gcount'),
+      gfailbtn=document.getElementById('gfailbtn'),gfail=false;
+  var GSKEL=(function(){var s='',i;for(i=0;i<6;i++)s+='<div class="gskel"><div class="gthumb"></div><h3></h3><p></p><p></p></div>';return s;})();
+  function fetchScenes(cb){
+    setTimeout(function(){ if(gfail)cb(new Error('mock-fail')); else cb(null,SCENES.slice()); },700);
+  }
+  function gState(type,msg){
+    if(type==='loading'){
+      gstate.className='';
+      ggrid.style.display='';ggrid.innerHTML=GSKEL;gcount.textContent='';
+      return;
+    }
+    ggrid.style.display='none';
+    gstate.className='show';
+    gstate.innerHTML='<div class="stxt">'+msg+'</div>'+
+      (type==='error'?'<button id="gretry" class="gbtn" type="button">重 试</button>':'')+
+      (type==='empty'?'<button id="gemptyclear" class="gbtn" type="button">清空搜索</button>':'');
+    var r=document.getElementById('gretry');if(r)r.addEventListener('click',loadGallery);
+    var c=document.getElementById('gemptyclear');if(c)c.addEventListener('click',function(){ginput.value='';renderGallery(SCENES);ginput.focus();});
+  }
+  function loadGallery(){
+    gState('loading');
+    fetchScenes(function(err,data){
+      if(err){gState('error','<b>⚠</b>图卷数据加载失败，请重试');return;}
+      try{
+        if(!data.length){gState('empty','<b>◇</b>图卷暂无内容');return;}
+        renderGallery(data);
+      }catch(e){gState('error','<b>⚠</b>图卷渲染出错，请重试');}
+    });
+  }
+  function renderGallery(data){
+    gstate.className='';
+    var q=ginput.value.trim().toLowerCase(),html='',n=0,i;
+    for(i=0;i<data.length;i++){
+      var d=data[i],hay=(d.ch+d.name+d.char+(d.fact||'')+(d.k||'')).toLowerCase();
+      if(q&&hay.indexOf(q)<0)continue;
+      n++;
+      html+='<button type="button" class="gcard" data-i="'+i+'">'+
+        '<div class="gthumb" style="background-image:url(\'assets/'+GIMG[i]+'.png\')"><span class="gnum">第'+d.ch+'幕 · '+d.char+'</span></div>'+
+        '<h3>'+d.name+'</h3><p class="gk">'+(d.k||'')+'</p><p class="gfact">'+(d.fact||'')+'</p></button>';
+    }
+    if(n===0){gState('empty','<b>◇</b>没有匹配「'+ginput.value.trim()+'」的幕');gcount.textContent='0 / '+data.length+' 幕';return;}
+    ggrid.innerHTML=html;ggrid.style.display='';
+    gcount.textContent=(q?n+' / ':'')+data.length+' 幕';
+    [].slice.call(ggrid.querySelectorAll('.gcard')).forEach(function(c){
+      c.addEventListener('click',function(){
+        pendingJump=+c.getAttribute('data-i');
+        location.hash='#/';
+      });
+    });
+  }
+  ginput.addEventListener('input',function(){if(!gstate.className)renderGallery(SCENES);});
+  document.getElementById('gclear').addEventListener('click',function(){ginput.value='';renderGallery(SCENES);ginput.focus();});
+  document.getElementById('greload').addEventListener('click',loadGallery);
+  gfailbtn.addEventListener('click',function(){
+    gfail=!gfail;
+    gfailbtn.textContent='模拟请求失败：'+(gfail?'开':'关');
+    gfailbtn.classList.toggle('off',!gfail);
+    gfailbtn.setAttribute('aria-pressed',gfail?'true':'false');
   });
 
   /* 鼠标视差（缓动） */
