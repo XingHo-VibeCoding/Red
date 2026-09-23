@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 470" font-family="Consolas, 'Microsoft YaHei', monospace">
+  <rect width="680" height="470" fill="#f7f8fa"/>
+  <text x="24" y="28" font-size="18" font-weight="bold" fill="#1f2430">长征站接口分层（Day 19 重构后）</text>
+  <text x="24" y="48" font-size="12" fill="#6b7280">原则：契约不变（路径/字段/响应形状）；查库逻辑集中在数据访问层</text>
+
+  <!-- 访客/浏览器 -->
+  <rect x="80" y="64" width="520" height="46" rx="8" fill="#e8eefc" stroke="#3b6fd4"/>
+  <text x="100" y="93" font-size="14" fill="#1f3a6e">访客 / 浏览器（前端 index.html 图卷调用 fetchScenes）</text>
+
+  <!-- 箭头 -->
+  <g fill="#394150"><path d="M340 114 l-7 14 h14 z"/></g>
+  <text x="360" y="125" font-size="12" fill="#394150">HTTP GET /api/scenes</text>
+
+  <!-- HTTP 层 -->
+  <rect x="80" y="130" width="520" height="70" rx="8" fill="#eafaf0" stroke="#2f9e57"/>
+  <text x="100" y="156" font-size="14" font-weight="bold" fill="#155e35">HTTP 层 · api-scenes/index.js</text>
+  <text x="100" y="178" font-size="12" fill="#2c6e49">收请求 → 校验 method / limit → 调 getScenes() → 按契约包装响应</text>
+  <text x="100" y="194" font-size="12" fill="#2c6e49">只含路由与响应格式，不含任何 SQL</text>
+
+  <!-- 箭头 -->
+  <g fill="#394150"><path d="M340 204 l-7 14 h14 z"/></g>
+  <text x="360" y="215" font-size="12" fill="#394150">require('./db') → getScenes(limit)</text>
+
+  <!-- 数据访问层 -->
+  <rect x="80" y="220" width="520" height="92" rx="8" fill="#fff4d6" stroke="#c79100"/>
+  <text x="100" y="246" font-size="14" font-weight="bold" fill="#7a5200">数据访问层 · api-scenes/db.js（Day 19 新拆出）</text>
+  <text x="100" y="268" font-size="12" fill="#8a6500">loadApiKey() 读密钥 → execPgsql() 打网关 → rowToScene() 行映射</text>
+  <text x="100" y="284" font-size="12" fill="#8a6500">getScenes(limit)：拼 SELECT … LEFT JOIN … ORDER BY order_no</text>
+  <text x="100" y="300" font-size="12" fill="#8a6500">参数化查询防注入（$1 占位）；密钥仅来自环境变量 / .env，不入库</text>
+
+  <!-- 箭头 -->
+  <g fill="#394150"><path d="M340 314 l-7 14 h14 z"/></g>
+  <text x="360" y="325" font-size="12" fill="#394150">HTTPS POST 网关 exec-pgsql（Bearer Key）</text>
+
+  <!-- 网关 -->
+  <rect x="80" y="330" width="520" height="50" rx="8" fill="#efe9fb" stroke="#7a52d4"/>
+  <text x="100" y="360" font-size="14" fill="#3d2a6e">CloudBase 网关 · /v1/rdb/exec-pgsql（免费版唯一可用通路）</text>
+
+  <!-- 箭头 -->
+  <g fill="#394150"><path d="M340 382 l-7 14 h14 z"/></g>
+
+  <!-- PG -->
+  <rect x="80" y="398" width="520" height="46" rx="8" fill="#fde9e9" stroke="#c0392b"/>
+  <text x="100" y="427" font-size="14" fill="#7a241c">PostgreSQL · scenes（十幕）LEFT JOIN scene_facts（每幕史实注）</text>
+</svg>
