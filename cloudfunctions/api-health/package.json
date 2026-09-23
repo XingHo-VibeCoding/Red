@@ -1,0 +1,8 @@
+{
+  "name": "api-health",
+  "version": "1.0.0",
+  "description": "红军长征叙事站 · 健康检查接口（Day 15）",
+  "main": "index.js",
+  "private": true,
+  "dependencies": {}
+}

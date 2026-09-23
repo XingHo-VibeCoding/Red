@@ -1,0 +1,16 @@
+{
+  "envId": "red-army-story-d5gdwz8vn0d35dc0b",
+  "region": "ap-shanghai",
+  "functionRoot": "./cloudfunctions",
+  "functions": [
+    {
+      "name": "api-health",
+      "timeout": 5,
+      "memorySize": 256,
+      "runtime": "Nodejs20.19",
+      "handler": "index.main",
+      "installDependency": false,
+      "description": "红军长征叙事站 · 健康检查接口（Day 15）"
+    }
+  ]
+}

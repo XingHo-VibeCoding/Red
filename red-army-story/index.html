@@ -189,7 +189,7 @@ body.pre{overflow:hidden}
      非叙事视图隐藏叙事 UI；视图本体是 fixed 覆盖层，可滚动。 */
   body:not([data-view="narrative"]) :is(#stage,#spacer,#pbar,#chap,#ticks,#mapbtn,#filterbtn,#factbtn,#factcard,#mappanel,#filterpanel){display:none!important}
   body.pre #vnav,body.pre .view,body.pre #viewback{display:none!important}
-  #vnav{position:fixed;top:18px;right:22px;z-index:60;display:flex;gap:6px;background:rgba(13,8,5,.72);border:1px solid rgba(217,181,106,.28);border-radius:999px;padding:5px;backdrop-filter:blur(10px)}
+  #vnav{position:fixed;top:18px;right:164px;z-index:60;display:flex;gap:6px;background:rgba(13,8,5,.72);border:1px solid rgba(217,181,106,.28);border-radius:999px;padding:5px;backdrop-filter:blur(10px)}
   #vnav button{font-family:'Noto Serif SC',serif;font-size:12px;letter-spacing:.22em;text-indent:.22em;color:var(--dim);background:none;border:1px solid transparent;border-radius:999px;padding:7px 16px;cursor:pointer;transition:.25s}
   #vnav button:hover{color:var(--gold);border-color:rgba(217,181,106,.4)}
   #vnav button.cur{color:#1a0f06;background:linear-gradient(135deg,#e8c98a,#c9973f);font-weight:700;box-shadow:0 2px 14px rgba(217,181,106,.35)}
@@ -240,6 +240,19 @@ body.pre{overflow:hidden}
   .quote-wall{max-width:760px;margin:0 auto;display:grid;gap:16px}
   .quote{font-family:'Noto Serif SC',serif;background:rgba(20,12,6,.72);border:1px solid rgba(217,181,106,.22);border-left:3px solid #c9973f;border-radius:10px;padding:18px 22px;font-size:14px;line-height:2;color:#d9c9a0;letter-spacing:.05em}
   .quote b{display:block;margin-top:6px;font-size:12px;color:#a89468;letter-spacing:.25em;font-weight:400}
+
+  /* ===== Day 14 最小修复：手机宽度（≤640px）顶部悬浮件冲突 =====
+     根因：桌面顶部一排塞得下「章节题字+导航+音乐按钮」，小屏塞不下 →
+     题字被导航盖住、音乐按钮被完全覆盖（功能不可达）、返回按钮与导航仅距 1px。
+     修法：题字收窄让位，导航下移到第二行，返回按钮与视图内边距同步收紧。 */
+  @media (max-width:640px){
+    #chap{max-width:42vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;top:24px;left:18px;font-size:12px}
+    #mute{top:16px;right:14px;padding:7px 12px;font-size:11px;letter-spacing:.1em}
+    #vnav{top:62px;right:14px;padding:4px}
+    #vnav button{padding:6px 13px;font-size:11px;letter-spacing:.14em;text-indent:.14em}
+    #viewback{top:16px;left:14px;padding:7px 13px;font-size:11px}
+    .view{padding:78px 20px 84px}
+  }
 </style>
 </head>
 <body class="pre">
