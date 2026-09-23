@@ -11,6 +11,15 @@
       "handler": "index.main",
       "installDependency": false,
       "description": "红军长征叙事站 · 健康检查接口（Day 15）"
+    },
+    {
+      "name": "api-scenes",
+      "timeout": 10,
+      "memorySize": 256,
+      "runtime": "Nodejs20.19",
+      "handler": "index.main",
+      "installDependency": false,
+      "description": "红军长征叙事站 · 十幕数据读接口（Day 17）"
     }
   ]
 }

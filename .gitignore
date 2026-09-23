@@ -1,3 +1,5 @@
 ﻿.env
 .workbuddy
 打卡
+node_modules/
+测试代码/

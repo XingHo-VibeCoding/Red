@@ -1,0 +1,6 @@
+{
+  "name": "api-scenes",
+  "version": "1.0.0",
+  "description": "红军长征叙事站 · 十幕数据读接口（GET /api/scenes，Day 17）",
+  "main": "index.js"
+}

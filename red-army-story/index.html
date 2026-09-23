@@ -703,16 +703,35 @@ body.pre{overflow:hidden}
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape'&&curView()!=='narrative')location.hash='#/';
   });
-  applyView(curView());
+  /* Day 17 修复：初始 applyView 挪到下方图卷变量赋值之后——
+     否则带 #/gallery 直开时 loadGallery 会用到尚未赋值的 gstate（undefined 崩溃） */
 
   /* ===== 图卷目录（#/gallery）：列表四态——加载骨架 / 正常 / 空 / 错误 =====
      模拟异步接口取 SCENES（Day 8 预留的"数据接口位"演示）：真实接入时把 fetchScenes 换成 fetch 即可 */
   var ggrid=document.getElementById('ggrid'),gstate=document.getElementById('gstate'),
       ginput=document.getElementById('ginput'),gcount=document.getElementById('gcount'),
       gfailbtn=document.getElementById('gfailbtn'),gfail=false;
+  applyView(curView());   // Day 17 修复：初始视图分发挪到这里（原图卷变量未赋值就跑会崩）
   var GSKEL=(function(){var s='',i;for(i=0;i<6;i++)s+='<div class="gskel"><div class="gthumb"></div><h3></h3><p></p><p></p></div>';return s;})();
   function fetchScenes(cb){
-    setTimeout(function(){ if(gfail)cb(new Error('mock-fail')); else cb(null,SCENES.slice()); },700);
+    /* Day 17：真接口 GET /api/scenes（契约见 api-contract.md）
+       gfail 仍可模拟故障（保留 Day 8 四态演示）；接口不可用时回退内置数据，页面永不空白 */
+    if(gfail){ setTimeout(function(){ cb(new Error('mock-fail')); },700); return; }
+    var API='https://red-army-story-d5gdwz8vn0d35dc0b.service.tcloudbase.com/api/scenes';
+    var settled=false;
+    fetch(API,{cache:'no-store'}).then(function(r){ return r.json(); }).then(function(res){
+      if(settled)return; settled=true;
+      if(res && res.ok && Array.isArray(res.data) && res.data.length){
+        SCENES=res.data;              // 同步全局：叙事视图与图卷从此用同一份真库数据
+        cb(null,res.data);
+      }else{
+        cb(new Error('bad payload'));
+      }
+    }).catch(function(){
+      if(settled)return; settled=true;
+      console.warn('[scenes] 接口不可用，回退内置数据');
+      cb(null,SCENES.slice());
+    });
   }
   function gState(type,msg){
     if(type==='loading'){
