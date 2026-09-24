@@ -529,7 +529,14 @@ body.pre{overflow:hidden}
   }catch(e){                                  /* 错误态：渲染异常的兜底 */
     showState('error','画卷展开时遇到了问题，请重试');
   }
-  if(renderOk)setTimeout(hideState,600);      /* 加载态稍作停留后进入正常态 */
+  if(renderOk){
+    setTimeout(hideState,600);                /* 加载态稍作停留后进入正常态 */
+    /* Day 20 补漏：首页加载即拉真库。此前 fetchScenes 只有进入图卷视图才被
+       loadGallery 触发（applyView 的 if(v==='gallery') 分支），停在首页时
+       SCENES 永远是内置数据，叙事画面自然吃不到改库后的新值。
+       成功后的叙事回填逻辑在 fetchScenes 内部（Day 20 修复块）。 */
+    fetchScenes(function(){});
+  }
   if(!renderOk)return;                        /* 空态/错误态下不再初始化滚动叙事 */
 
   var scenes=[].slice.call(document.querySelectorAll('.scene'));
@@ -723,6 +730,12 @@ body.pre{overflow:hidden}
       if(settled)return; settled=true;
       if(res && res.ok && Array.isArray(res.data) && res.data.length){
         SCENES=res.data;              // 同步全局：叙事视图与图卷从此用同一份真库数据
+        /* Day 20 修复：真库数据回填叙事画面。此前仅图卷吃真库，叙事大标题
+           仍是加载瞬间的内置文案（控制台改库后首页不变的根因）。
+           .scene 的 on 类由主循环按可视度持续维护，重渲染后 .rv 揭示状态自动恢复 */
+        [].slice.call(document.querySelectorAll('.scene')).forEach(function(el,i){
+          if(SCENES[i])renderSceneCard(el,SCENES[i]);
+        });
         cb(null,res.data);
       }else{
         cb(new Error('bad payload'));
