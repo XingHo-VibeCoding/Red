@@ -1108,7 +1108,7 @@ body.pre{overflow:hidden}
       document.getElementById('msgCount').textContent='共 '+res.data.length+' 条';
       list.innerHTML=res.data.map(function(m){
         return '<li data-id="'+m.id+'">'+
-          '<div class="msg-meta">第'+(m.ch||'?')+'幕 · '+new Date(m.created_at).toLocaleString('zh-CN')+'</div>'+
+          '<div class="msg-meta">第'+esc(m.ch||'?')+'幕 · '+new Date(m.created_at).toLocaleString('zh-CN')+'</div>'+
           '<div class="msg-text">'+esc(m.content)+'</div>'+
           '<div class="msg-ops"><button class="msg-edit" type="button">改</button><button class="msg-del" type="button">删</button></div></li>';
       }).join('');
