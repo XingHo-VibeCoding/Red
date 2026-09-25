@@ -93,6 +93,9 @@ exports.main = async (event) => {
     }
   }
 
+  /* 余力：最简请求日志（时间 / 路径 / 方法；结果在分支与 catch 中体现） */
+  console.log('[api-messages] req', method, (event.path || BASE) + (id !== null ? ('?id=' + id) : ''), toBeijingTime(now));
+
   try {
     /* ── 查：列表 ── */
     if (method === 'GET') {

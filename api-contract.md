@@ -168,3 +168,4 @@
 - 2026-09-23（Day 15）：建立契约；上线 `GET /api/health`；部署前端静态托管。
 - 2026-09-23（Day 17）：`GET /api/scenes` 从占位转正并上线（含 `?limit` 加练参数）；新增错误码 `INVALID_PARAM`、`DB_ERROR`；登记 mock vs 表两处字段对不上点（char/glyph、fact 走 JOIN）。
 - 2026-09-25（Day 22）：`/api/messages` 上线，四类操作闭环（POST 创建 / GET 列表 / PATCH 修改 / DELETE 软删除）；新增错误码 `NOT_FOUND`；登记网关写通道需显式 `role: "cloudbase_postgres"`、资源 id 走 `?id=` 查询参数、软删除 `is_deleted` 标记三处实现要点。
+- 2026-09-25（Day 23）：密钥红线排查——全仓库（含 git 历史 pickaxe）搜不到 Admin API Key 的 JWT 特征串（以 eyJ 开头的 RS256 头字面量，此处不写全以免污染后续扫描），`.env` 从未被跟踪、已被 `.gitignore` 忽略；三类错误提示统一为「中文人话」并实跑验证（`METHOD_NOT_ALLOWED` / `INVALID_PARAM` / `NOT_FOUND` 均返回中文 message，裸 PostgreSQL / 平台错误已转为 `DB_ERROR` 中文）。余力：api-messages 加最简请求日志（时间/路径/方法）。
