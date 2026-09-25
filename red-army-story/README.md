@@ -55,6 +55,18 @@ npx serve red-army-story
 
 > 当前 MVP 双击即可，以上命令仅备用存档。
 
+## Day 25 更新：发布前检查 Skill（一条命令把关）
+
+每次部署上线 / 对外交付**之前**，跑一遍发布前检查（零依赖，装了 Node ≥18 即可）：
+
+```bash
+node red-army-story/skills/precheck/check.js            # 全量：本地资产 + 密钥 + 公网 + 三类接口
+node red-army-story/skills/precheck/check.js --offline  # 只查本地项（资产 / 密钥，断网可用）
+```
+
+- 全部通过输出 `6/6 通过，可以发布`，退出码 0；任何一项 FAIL 退出码 1，**禁止发布**。
+- 检查项与「故意弄坏验证法」见 `skills/precheck/SKILL.md`。
+
 ## 文件说明
 
 - `index.html` —— **正式 v1 MVP**（Day 7 由 `demo-v4.html` 转正而来，含全部叙事 + 样式 + 脚本）
