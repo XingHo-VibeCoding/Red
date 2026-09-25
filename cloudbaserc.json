@@ -20,6 +20,15 @@
       "handler": "index.main",
       "installDependency": false,
       "description": "红军长征叙事站 · 十幕数据读接口（Day 17）"
+    },
+    {
+      "name": "api-messages",
+      "timeout": 10,
+      "memorySize": 256,
+      "runtime": "Nodejs20.19",
+      "handler": "index.main",
+      "installDependency": false,
+      "description": "红军长征叙事站 · 留言墙 CRUD 接口（Day 22）"
     }
   ]
 }

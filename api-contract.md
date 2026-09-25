@@ -115,7 +115,49 @@
 
 **真库验证记录（2026-09-23）**：UPDATE 壹幕 title → 接口刷新即返回新标题 → 还原后恢复。数据来自数据库实时查询，非写死。
 
-## 四、计划中的接口（占位，Day 18-20 实现，实现前先在此登记）
+### GET / POST / PATCH / DELETE /api/messages（读者留言墙 · 增删改查 · Day 22 上线）
+
+- **用途**：读者留言墙。提供留言的创建（POST）、列表（GET）、修改（PATCH）、删除（DELETE）四类操作，前端「留言墙」浮层调用。资源 id 一律走查询参数 `?id=`（CloudBase HTTP 访问服务会把子路径 `/2` 归一化为注册基路径 `/api/messages`，`event.path` 拿不到 id，故用 `?id=`）。
+- **实现说明**：免费版 PG 网关默认角色是只读事务，写操作（POST/PATCH/DELETE）必须在请求体里显式带 `role: "cloudbase_postgres"`；只读角色 `cloudbase_read_only_user_pgdb_mbnyk2hh` 已对 messages 表 GRANT SELECT（含 sequence）。软删除：`is_deleted` 布尔标记，DELETE 只置标记不真删；列表默认跳过已删行，`?include_deleted=1` 可找回。
+- **CORS**：`Allow-Methods: GET, POST, OPTIONS, PATCH, DELETE`；`Allow-Origin: *`。
+- **字段约束**：content 必填、非空、≤280 字；ch 可选（幕标签，如「壹」）。
+
+**POST /api/messages（创建）**
+
+- 请求体：`{ "ch": "壹", "content": "红军不怕远征难" }`（content 必填）
+- 200 示例：`{ "ok": true, "data": { "id": 5, "ch": "壹", "content": "红军不怕远征难", "is_deleted": false, "created_at": "...+08:00", "updated_at": "...+08:00" }, "time": "...", "timeBeijing": "..." }`
+
+**GET /api/messages（列表）**
+
+- 请求：`GET /api/messages`，可选 `?ch=壹`（按幕过滤）、`?include_deleted=1`（含已软删行）。
+- 200 示例：`{ "ok": true, "data": [ { "id": 2, "ch": "壹", "content": "红军不怕远征难", "is_deleted": false, ... } ], "count": 1, "source": "db", "time": "...", "timeBeijing": "..." }`
+
+**PATCH /api/messages?id=N（修改）**
+
+- 请求体：`{ "content": "红军不怕远征难（改）" }`
+- 先校验存在且未删，否则 404 `NOT_FOUND`（「该留言不存在或已删除」）。
+- 200 示例：`{ "ok": true, "data": { "id": N, "content": "红军不怕远征难（改）", ... }, ... }`
+
+**DELETE /api/messages?id=N（软删除）**
+
+- 先校验存在且未删，否则 404 `NOT_FOUND`。
+- 200 示例：`{ "ok": true, "data": { "id": N, "deleted": true }, "time": "...", "timeBeijing": "..." }`
+- 软删后 GET 列表不再返回该行；`?include_deleted=1` 仍可查到（is_deleted:true）。
+
+**错误响应**：
+
+| 错误码                | 触发                        | HTTP |
+| ------------------ | ------------------------- | ---- |
+| METHOD_NOT_ALLOWED | 不支持的方法                    | 405  |
+| INVALID_PARAM      | content 缺失/空/超 280 字 / id 非数字 | 400  |
+| NOT_FOUND          | PATCH/DELETE 目标不存在或已删        | 404  |
+| DB_ERROR           | 网关/数据库故障                   | 500  |
+
+**掌握点（Day 22）**：删除比新增更易出事——误删不可逆。本站双重兜底：① 前端 `confirm()` 二次确认；② 后端软删除（`is_deleted` 标记，删错可 `?include_deleted=1` 找回，再补 PATCH 还原）。余力加练的软删除已随主流程一并落地。
+
+**真库验证记录（2026-09-25）**：POST 创建 id=5 / PATCH 改「红军不怕远征难」→「红军不怕远征难（改）」生效 / DELETE 后该行从列表消失，`include_deleted=1` 可找回；错误形状 404/400 均为中文。
+
+## 四、计划中的接口（占位，实现前先在此登记）
 
 | 接口                    | 用途             | 对应前端现状                                                  |
 | --------------------- | -------------- | ------------------------------------------------------- |
@@ -125,3 +167,4 @@
 
 - 2026-09-23（Day 15）：建立契约；上线 `GET /api/health`；部署前端静态托管。
 - 2026-09-23（Day 17）：`GET /api/scenes` 从占位转正并上线（含 `?limit` 加练参数）；新增错误码 `INVALID_PARAM`、`DB_ERROR`；登记 mock vs 表两处字段对不上点（char/glyph、fact 走 JOIN）。
+- 2026-09-25（Day 22）：`/api/messages` 上线，四类操作闭环（POST 创建 / GET 列表 / PATCH 修改 / DELETE 软删除）；新增错误码 `NOT_FOUND`；登记网关写通道需显式 `role: "cloudbase_postgres"`、资源 id 走 `?id=` 查询参数、软删除 `is_deleted` 标记三处实现要点。

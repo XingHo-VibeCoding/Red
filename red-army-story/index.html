@@ -1015,5 +1015,99 @@ body.pre{overflow:hidden}
   });
 })();
 </script>
+<!-- Day 22 留言墙：最小 CRUD UI（含删除二次确认），与叙事/图卷视图解耦 -->
+<button id="msgToggle" type="button" class="msg-trigger" aria-label="打开留言墙">留言墙</button>
+<section id="msgWall" class="msg-wall" hidden aria-label="留言墙">
+  <div class="msg-head">
+    <span class="msg-title">留言墙</span>
+    <button id="msgClose" type="button" class="msg-x">收起</button>
+  </div>
+  <form id="msgForm" class="msg-form">
+    <textarea id="msgInput" maxlength="280" rows="2" placeholder="写下你想对这支队伍说的话（最多 280 字）"></textarea>
+    <div class="msg-row">
+      <input id="msgCh" maxlength="10" placeholder="关联幕号（可选，如 壹）" />
+      <button id="msgSubmit" type="submit" class="msg-btn">提交留言</button>
+    </div>
+    <div id="msgHint" class="msg-hint"></div>
+  </form>
+  <ul id="msgList" class="msg-list"></ul>
+</section>
+<style>
+.msg-trigger{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:60;background:linear-gradient(180deg,#7a1f1f,#4a1212);color:#f3d9a0;border:1px solid #b9892f;border-radius:20px;padding:7px 18px;font:600 14px/1 "Microsoft YaHei",sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.msg-wall{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(560px,94vw);max-height:72vh;overflow:auto;z-index:61;background:rgba(20,12,12,.97);border:1px solid #b9892f;border-bottom:none;border-radius:14px 14px 0 0;padding:14px 16px 20px;color:#ece3da;font-family:"Microsoft YaHei",sans-serif}
+.msg-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.msg-title{font:700 18px/1 "Microsoft YaHei";color:#f3d9a0}
+.msg-x{background:none;border:1px solid #8a6a3a;color:#e7c98a;border-radius:10px;padding:4px 12px;cursor:pointer}
+.msg-form textarea{width:100%;box-sizing:border-box;background:#2a1818;color:#f0e6dc;border:1px solid #6a4a2a;border-radius:8px;padding:8px;font:14px/1.5 "Microsoft YaHei";resize:vertical}
+.msg-row{display:flex;gap:8px;margin-top:8px}
+.msg-row input{flex:0 0 140px;background:#2a1818;color:#f0e6dc;border:1px solid #6a4a2a;border-radius:8px;padding:7px}
+.msg-btn{flex:1;background:linear-gradient(180deg,#7a1f1f,#4a1212);color:#f3d9a0;border:1px solid #b9892f;border-radius:8px;padding:8px;font-weight:700;cursor:pointer}
+.msg-hint{min-height:18px;margin-top:6px;font-size:13px;color:#e6b85a}
+.msg-list{list-style:none;margin:12px 0 0;padding:0}
+.msg-list li{background:#241616;border:1px solid #5a3a22;border-radius:8px;padding:9px 10px;margin-bottom:8px}
+.msg-meta{font-size:12px;color:#b89a78;margin-bottom:4px}
+.msg-text{font-size:14px;color:#f0e6dc;white-space:pre-wrap;word-break:break-word}
+.msg-ops{margin-top:6px;display:flex;gap:8px}
+.msg-ops button{background:none;border:1px solid #8a6a3a;color:#e7c98a;border-radius:8px;padding:3px 10px;font-size:12px;cursor:pointer}
+</style>
+<script>
+(function(){
+  var API='https://red-army-story-d5gdwz8vn0d35dc0b.service.tcloudbase.com/api/messages';
+  var toggle=document.getElementById('msgToggle');
+  var wall=document.getElementById('msgWall');
+  var list=document.getElementById('msgList');
+  var form=document.getElementById('msgForm');
+  var input=document.getElementById('msgInput');
+  var chInput=document.getElementById('msgCh');
+  var hint=document.getElementById('msgHint');
+  function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function load(){
+    fetch(API,{cache:'no-store'}).then(function(r){return r.json();}).then(function(res){
+      if(!res||!res.ok){list.innerHTML='<li class="msg-hint">留言加载失败</li>';return;}
+      if(!res.data.length){list.innerHTML='<li class="msg-hint">还没有留言，来写第一条吧。</li>';return;}
+      list.innerHTML=res.data.map(function(m){
+        return '<li data-id="'+m.id+'">'+
+          '<div class="msg-meta">第'+(m.ch||'?')+'幕 · '+new Date(m.created_at).toLocaleString('zh-CN')+'</div>'+
+          '<div class="msg-text">'+esc(m.content)+'</div>'+
+          '<div class="msg-ops"><button class="msg-edit" type="button">改</button><button class="msg-del" type="button">删</button></div></li>';
+      }).join('');
+    }).catch(function(){list.innerHTML='<li class="msg-hint">留言加载失败</li>';});
+  }
+  toggle.addEventListener('click',function(){
+    wall.hidden=!wall.hidden;
+    if(!wall.hidden)load();
+  });
+  document.getElementById('msgClose').addEventListener('click',function(){wall.hidden=true;});
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var content=input.value.trim();
+    if(!content){hint.textContent='内容不能为空';return;}
+    hint.textContent='提交中…';
+    fetch(API,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:content,ch:chInput.value.trim()||null})})
+      .then(function(r){return r.json();}).then(function(res){
+        if(res&&res.ok){input.value='';chInput.value='';hint.textContent='已提交';load();}
+        else{hint.textContent=(res&&res.message)||'提交失败';}
+      }).catch(function(){hint.textContent='提交失败，请重试';});
+  });
+  list.addEventListener('click',function(e){
+    var li=e.target.closest('li'); if(!li)return;
+    var id=+li.getAttribute('data-id');
+    if(e.target.classList.contains('msg-edit')){
+      var cur=li.querySelector('.msg-text').textContent;
+      var nv=prompt('修改留言内容：',cur);
+      if(nv===null)return;
+      nv=nv.trim(); if(!nv){alert('内容不能为空');return;}
+      fetch(API+'?id='+id,{method:'PATCH',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:nv})})
+        .then(function(r){return r.json();}).then(function(res){ if(res&&res.ok)load(); else alert((res&&res.message)||'修改失败'); });
+    } else if(e.target.classList.contains('msg-del')){
+      // 掌握点：删除比新增易出事（不可逆）——二次确认兜底
+      if(!confirm('确定删除这条留言吗？\n删除后可在后台用 ?include_deleted=1 找回。'))return;
+      fetch(API+'?id='+id,{method:'DELETE',cache:'no-store'}).then(function(r){return r.json();}).then(function(res){
+        if(res&&res.ok)load(); else alert((res&&res.message)||'删除失败');
+      }).catch(function(){alert('删除失败');});
+    }
+  });
+})();
+</script>
 </body>
 </html>
