@@ -150,6 +150,7 @@ body.pre{overflow:hidden}
 .vignette::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,2,1,.35),transparent 12%,transparent 88%,rgba(4,2,1,.4))}
 #grain{position:fixed;inset:0;z-index:21;pointer-events:none;opacity:.075}
 #hint{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:30;color:var(--dim);font-size:12px;letter-spacing:.55em;text-indent:.55em;animation:flick 2.4s infinite;transition:opacity .9s}
+#credit{position:fixed;right:30px;bottom:9px;z-index:6;font-size:12px;letter-spacing:.12em;color:var(--dim);font-family:'Noto Serif SC',serif;pointer-events:none}
 #hint.off{opacity:0}
 #hint::before,#hint::after{content:"";position:absolute;top:50%;width:50px;height:1px;background:linear-gradient(90deg,transparent,rgba(217,181,106,.4));margin-top:-.5px}
 #hint::before{left:-70px}
@@ -252,6 +253,15 @@ body.pre{overflow:hidden}
     #vnav button{padding:6px 13px;font-size:11px;letter-spacing:.14em;text-indent:.14em}
     #viewback{top:16px;left:14px;padding:7px 13px;font-size:11px}
     .view{padding:78px 20px 84px}
+    #mapbtn,#filterbtn,#factbtn{width:44px;height:44px;bottom:18px;font-size:17px}
+    #mapbtn{left:14px}
+    #filterbtn{left:64px}
+    #factbtn{right:14px;font-size:18px}
+    #mappanel{left:14px;bottom:72px;width:min(296px,calc(100vw - 28px))}
+    #filterpanel{left:14px;bottom:72px;width:min(320px,calc(100vw - 28px))}
+    #factcard{right:14px;bottom:72px;width:min(370px,calc(100vw - 28px))}
+    #hint{bottom:26px;font-size:9px;letter-spacing:.22em;text-indent:.22em}
+    #credit{right:14px;bottom:2px;font-size:9.5px;letter-spacing:.06em;max-width:72vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   }
 </style>
 </head>
@@ -395,7 +405,7 @@ body.pre{overflow:hidden}
 
 <div class="vignette"></div>
 <!-- 史实标注（PRD §5：涉及具体史实处标注「待核实」） -->
-<div style="position:fixed;right:96px;bottom:30px;z-index:6;font-size:12px;letter-spacing:.12em;color:var(--dim);font-family:'Noto Serif SC',serif;pointer-events:none">※ 史实细节为常见表述整理 · 正式版逐条核实来源</div>
+<div id="credit">※ 史实细节为常见表述整理 · 正式版逐条核实来源</div>
 <svg id="grain" width="100%" height="100%">
   <filter id="nz"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
   <rect width="100%" height="100%" filter="url(#nz)"/>
@@ -1016,39 +1026,67 @@ body.pre{overflow:hidden}
 })();
 </script>
 <!-- Day 22 留言墙：最小 CRUD UI（含删除二次确认），与叙事/图卷视图解耦 -->
-<button id="msgToggle" type="button" class="msg-trigger" aria-label="打开留言墙">留言墙</button>
-<section id="msgWall" class="msg-wall" hidden aria-label="留言墙">
+<button id="msgToggle" type="button" class="msg-trigger" aria-label="留言墙" title="留言墙">墙</button>
+<section id="msgWall" class="msg-wall" aria-label="留言墙" aria-hidden="true">
   <div class="msg-head">
     <span class="msg-title">留言墙</span>
+    <span id="msgCount" class="msg-count"></span>
     <button id="msgClose" type="button" class="msg-x">收起</button>
   </div>
+  <span class="msg-rule" aria-hidden="true"></span>
   <form id="msgForm" class="msg-form">
-    <textarea id="msgInput" maxlength="280" rows="2" placeholder="写下你想对这支队伍说的话（最多 280 字）"></textarea>
+    <textarea id="msgInput" maxlength="280" rows="3" placeholder="写下你想对这支队伍说的话…"></textarea>
     <div class="msg-row">
-      <input id="msgCh" maxlength="10" placeholder="关联幕号（可选，如 壹）" />
+      <input id="msgCh" maxlength="10" placeholder="关联幕号（可选·如 壹）" />
       <button id="msgSubmit" type="submit" class="msg-btn">提交留言</button>
     </div>
-    <div id="msgHint" class="msg-hint"></div>
+    <div class="msg-foot">
+      <span id="msgHint" class="msg-hint"></span>
+      <span id="msgCounter" class="msg-counter">0 / 280</span>
+    </div>
   </form>
   <ul id="msgList" class="msg-list"></ul>
 </section>
 <style>
-.msg-trigger{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:60;background:linear-gradient(180deg,#7a1f1f,#4a1212);color:#f3d9a0;border:1px solid #b9892f;border-radius:20px;padding:7px 18px;font:600 14px/1 "Microsoft YaHei",sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4)}
-.msg-wall{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(560px,94vw);max-height:72vh;overflow:auto;z-index:61;background:rgba(20,12,12,.97);border:1px solid #b9892f;border-bottom:none;border-radius:14px 14px 0 0;padding:14px 16px 20px;color:#ece3da;font-family:"Microsoft YaHei",sans-serif}
-.msg-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.msg-title{font:700 18px/1 "Microsoft YaHei";color:#f3d9a0}
-.msg-x{background:none;border:1px solid #8a6a3a;color:#e7c98a;border-radius:10px;padding:4px 12px;cursor:pointer}
-.msg-form textarea{width:100%;box-sizing:border-box;background:#2a1818;color:#f0e6dc;border:1px solid #6a4a2a;border-radius:8px;padding:8px;font:14px/1.5 "Microsoft YaHei";resize:vertical}
-.msg-row{display:flex;gap:8px;margin-top:8px}
-.msg-row input{flex:0 0 140px;background:#2a1818;color:#f0e6dc;border:1px solid #6a4a2a;border-radius:8px;padding:7px}
-.msg-btn{flex:1;background:linear-gradient(180deg,#7a1f1f,#4a1212);color:#f3d9a0;border:1px solid #b9892f;border-radius:8px;padding:8px;font-weight:700;cursor:pointer}
-.msg-hint{min-height:18px;margin-top:6px;font-size:13px;color:#e6b85a}
-.msg-list{list-style:none;margin:12px 0 0;padding:0}
-.msg-list li{background:#241616;border:1px solid #5a3a22;border-radius:8px;padding:9px 10px;margin-bottom:8px}
-.msg-meta{font-size:12px;color:#b89a78;margin-bottom:4px}
-.msg-text{font-size:14px;color:#f0e6dc;white-space:pre-wrap;word-break:break-word}
-.msg-ops{margin-top:6px;display:flex;gap:8px}
-.msg-ops button{background:none;border:1px solid #8a6a3a;color:#e7c98a;border-radius:8px;padding:3px 10px;font-size:12px;cursor:pointer}
+.msg-trigger{position:fixed;right:96px;bottom:30px;z-index:40;width:54px;height:54px;border-radius:50%;border:1px solid rgba(217,181,106,.45);background:rgba(14,9,6,.55);color:var(--gold);cursor:pointer;font:inherit;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:border-color .35s,box-shadow .35s,transform .35s;backdrop-filter:blur(6px)}
+.msg-trigger:hover{border-color:var(--gold);box-shadow:0 0 18px rgba(217,181,106,.4);transform:scale(1.06)}
+.msg-trigger.open{background:var(--gold);color:#241505;box-shadow:0 0 24px rgba(217,181,106,.55)}
+.msg-wall{position:fixed;left:50%;bottom:0;width:min(580px,94vw);max-height:74vh;overflow:auto;z-index:61;background:linear-gradient(180deg,rgba(26,15,11,.94),rgba(16,9,7,.97));border:1px solid rgba(217,181,106,.4);border-bottom:none;border-radius:16px 16px 0 0;padding:18px 18px 22px;color:var(--paper);font-family:inherit;box-shadow:0 -10px 50px rgba(0,0,0,.55),inset 0 0 0 1px rgba(0,0,0,.3);backdrop-filter:blur(10px);opacity:0;transform:translate(-50%,24px);visibility:hidden;pointer-events:none;transition:opacity .4s ease,transform .45s cubic-bezier(.2,.7,.2,1),visibility .4s}
+.msg-wall.open{opacity:1;transform:translate(-50%,0);visibility:visible;pointer-events:auto}
+.msg-wall::-webkit-scrollbar{width:8px}
+.msg-wall::-webkit-scrollbar-thumb{background:rgba(217,181,106,.3);border-radius:4px}
+.msg-head{display:flex;align-items:center;gap:10px}
+.msg-title{font:700 min(7vw,22px)/1 inherit;letter-spacing:.22em;text-indent:.22em;background:linear-gradient(180deg,var(--gold-hi),var(--gold) 60%,#b9892f);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 1px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(217,181,106,.25))}
+.msg-count{font-size:12px;letter-spacing:.14em;color:var(--dim)}
+.msg-x{margin-left:auto;background:none;border:1px solid rgba(154,127,85,.4);color:var(--dim);border-radius:14px;padding:5px 15px;font:inherit;font-size:12px;letter-spacing:.16em;cursor:pointer;transition:color .3s,border-color .3s}
+.msg-x:hover{color:var(--gold);border-color:var(--gold)}
+.msg-rule{position:relative;display:block;width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(217,181,106,.7),transparent);margin:12px 0 14px}
+.msg-rule::after{content:"";position:absolute;top:50%;left:50%;width:9px;height:9px;background:linear-gradient(135deg,var(--gold-hi),var(--gold));transform:translate(-50%,-50%) rotate(45deg);box-shadow:0 0 10px rgba(217,181,106,.6);border-radius:2px}
+.msg-form textarea{width:100%;box-sizing:border-box;font:inherit;font-size:14.5px;line-height:1.6;color:var(--paper);background:rgba(255,255,255,.04);border:1px solid rgba(154,127,85,.38);border-radius:10px;padding:10px 12px;resize:vertical;outline:none;transition:border-color .3s,box-shadow .3s}
+.msg-form textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,181,106,.12)}
+.msg-row{display:flex;gap:10px;margin-top:10px}
+.msg-row input{flex:0 0 150px;font:inherit;font-size:13px;color:var(--paper);background:rgba(255,255,255,.04);border:1px solid rgba(154,127,85,.38);border-radius:10px;padding:9px 12px;outline:none;transition:border-color .3s}
+.msg-row input:focus{border-color:var(--gold)}
+.msg-btn{flex:1;font:inherit;font-weight:700;letter-spacing:.18em;text-indent:.18em;color:#241505;background:linear-gradient(180deg,var(--gold-hi),var(--gold) 55%,#bd9444);border:1px solid rgba(242,221,170,.6);border-radius:10px;padding:10px;cursor:pointer;transition:filter .3s,box-shadow .3s,transform .3s;box-shadow:0 4px 16px rgba(176,56,42,.25)}
+.msg-btn:hover{filter:brightness(1.08);box-shadow:0 6px 22px rgba(217,181,106,.4);transform:translateY(-1px)}
+.msg-btn:active{transform:translateY(0)}
+.msg-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px}
+.msg-hint{font-size:12.5px;letter-spacing:.06em;color:#e6b85a;min-height:16px}
+.msg-counter{font-size:12px;color:var(--dim);letter-spacing:.05em;font-variant-numeric:tabular-nums}
+.msg-list{list-style:none;margin:14px 0 0;padding:0}
+.msg-list li{position:relative;background:linear-gradient(180deg,rgba(58,34,20,.55),rgba(34,20,14,.5));border:1px solid rgba(154,127,85,.32);border-left:3px solid var(--gold);border-radius:10px;padding:11px 13px 12px;margin-bottom:10px;backdrop-filter:blur(4px);transition:transform .3s,border-color .3s,box-shadow .3s;animation:msgIn .45s ease both}
+.msg-list li:hover{transform:translateY(-2px);border-color:rgba(217,181,106,.6);box-shadow:0 6px 20px rgba(0,0,0,.35)}
+@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.msg-list li.msg-hint{padding:16px;text-align:center;color:var(--dim);border:1px dashed rgba(154,127,85,.3);border-left:1px dashed rgba(154,127,85,.3);background:none;font-size:13.5px;letter-spacing:.08em;animation:none}
+.msg-meta{font-size:12px;letter-spacing:.12em;color:var(--dim);margin-bottom:5px}
+.msg-meta b{color:var(--gold);font-weight:400}
+.msg-text{font-size:14.5px;line-height:1.7;color:var(--paper);white-space:pre-wrap;word-break:break-word}
+.msg-ops{margin-top:8px;display:flex;gap:8px}
+.msg-ops button{background:rgba(217,181,106,.06);border:1px solid rgba(154,127,85,.4);color:var(--gold);border-radius:8px;padding:4px 13px;font:inherit;font-size:12px;letter-spacing:.1em;cursor:pointer;transition:all .3s}
+.msg-ops .msg-edit:hover{background:rgba(217,181,106,.16);border-color:var(--gold)}
+.msg-ops .msg-del:hover{background:rgba(176,56,42,.18);border-color:#d9806f;color:#f0b3a3}
+@media (prefers-reduced-motion:reduce){.msg-wall,.msg-list li,.msg-trigger{transition:none;animation:none}}
+@media (max-width:640px){.msg-trigger{width:44px;height:44px;right:64px;bottom:18px;font-size:18px}}
 </style>
 <script>
 (function(){
@@ -1060,11 +1098,14 @@ body.pre{overflow:hidden}
   var input=document.getElementById('msgInput');
   var chInput=document.getElementById('msgCh');
   var hint=document.getElementById('msgHint');
+  var counter=document.getElementById('msgCounter');
+  input.addEventListener('input',function(){counter.textContent=input.value.length+' / 280';});
   function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   function load(){
     fetch(API,{cache:'no-store'}).then(function(r){return r.json();}).then(function(res){
       if(!res||!res.ok){list.innerHTML='<li class="msg-hint">留言加载失败</li>';return;}
-      if(!res.data.length){list.innerHTML='<li class="msg-hint">还没有留言，来写第一条吧。</li>';return;}
+      if(!res.data.length){list.innerHTML='<li class="msg-hint">还没有留言，来写第一条吧。</li>';document.getElementById('msgCount').textContent='';return;}
+      document.getElementById('msgCount').textContent='共 '+res.data.length+' 条';
       list.innerHTML=res.data.map(function(m){
         return '<li data-id="'+m.id+'">'+
           '<div class="msg-meta">第'+(m.ch||'?')+'幕 · '+new Date(m.created_at).toLocaleString('zh-CN')+'</div>'+
@@ -1074,10 +1115,14 @@ body.pre{overflow:hidden}
     }).catch(function(){list.innerHTML='<li class="msg-hint">留言加载失败</li>';});
   }
   toggle.addEventListener('click',function(){
-    wall.hidden=!wall.hidden;
-    if(!wall.hidden)load();
+    var open=wall.classList.toggle('open');
+    toggle.classList.toggle('open',open);
+    wall.setAttribute('aria-hidden',open?'false':'true');
+    if(open)load();
   });
-  document.getElementById('msgClose').addEventListener('click',function(){wall.hidden=true;});
+  document.getElementById('msgClose').addEventListener('click',function(){
+    wall.classList.remove('open');toggle.classList.remove('open');wall.setAttribute('aria-hidden','true');
+  });
   form.addEventListener('submit',function(e){
     e.preventDefault();
     var content=input.value.trim();
@@ -1085,7 +1130,7 @@ body.pre{overflow:hidden}
     hint.textContent='提交中…';
     fetch(API,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:content,ch:chInput.value.trim()||null})})
       .then(function(r){return r.json();}).then(function(res){
-        if(res&&res.ok){input.value='';chInput.value='';hint.textContent='已提交';load();}
+        if(res&&res.ok){input.value='';chInput.value='';counter.textContent='0 / 280';hint.textContent='已提交';load();}
         else{hint.textContent=(res&&res.message)||'提交失败';}
       }).catch(function(){hint.textContent='提交失败，请重试';});
   });
